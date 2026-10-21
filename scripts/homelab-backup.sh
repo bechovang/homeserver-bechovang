@@ -71,8 +71,9 @@ for entry in "${MYSQLS[@]}"; do
   for db in $dbs; do
     out="$MYSQL_DIR/${cname}__${db}.sql.gz"
     tmp="$out.tmp"
+    # no --databases: dump phải restore được vào DB tạm (không có USE/CREATE DATABASE)
     docker exec -e MYSQL_PWD="$rootpw" "$cid" mysqldump -uroot \
-      --single-transaction --quick --routines --triggers --databases "$db" |
+      --single-transaction --quick --routines --triggers "$db" |
       gzip -c >"$tmp"
     mv -f "$tmp" "$out"
     if [[ "$(date +%u)" == "7" ]]; then
