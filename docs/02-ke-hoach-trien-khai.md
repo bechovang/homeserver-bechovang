@@ -115,6 +115,7 @@ Giới hạn: mỗi service **1 replica**; không build trên server; tạm dừ
 - Nghiệm thu: push → tự deploy ✅ · CI đỏ → build/deploy **skip** ✅ · rollback `sha-<sha>` ✅ · `/health` qua tunnel 200 ✅
 - Chưa tạo PostgreSQL service — app hello không cần DB; làm khi app đầu tiên cần
 - **App thứ 2 (22/10):** blog tĩnh `bechovang.github.io` → `https://phucnn.io.vn` + `www` (nginx, image 24MB) qua cùng pipeline
+- **App thứ 3 (22/10):** StorageHub (Spring Boot + React + MySQL) → `https://storagehub.phucnn.io.vn`, chạy bằng **Dokploy Compose 3 service**, image GHCR, không build trên server; chi tiết [`08-storagehub.md`](08-storagehub.md)
 - Chi tiết + ID tài nguyên: [`05-phase5-app-cicd.md`](05-phase5-app-cicd.md) · playbook chung: [`07-deploying-apps.md`](07-deploying-apps.md)
 
 ### 🔄 Phase 6 — Monitoring + Backup + Dashboard + nghiệm thu (22/10)

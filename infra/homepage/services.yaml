@@ -21,6 +21,10 @@
         icon: si:githubpages
         href: https://phucnn.io.vn
         description: bechovang.github.io - nginx container
+    - StorageHub:
+        icon: si:spring
+        href: https://storagehub.phucnn.io.vn
+        description: Spring Boot + React + MySQL
     - hello:
         icon: si:github
         href: https://hello.phucnn.io.vn

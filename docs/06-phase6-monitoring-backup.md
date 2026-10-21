@@ -10,7 +10,8 @@ Cài `/usr/local/sbin/homelab-backup.sh`, chạy root qua systemd.
 | Thành phần | Đường dẫn | Ghi chú |
 |---|---|---|
 | Postgres dump | `/data/backups/postgres/<container>__<db>.dump` | `pg_dump -Fc`, giữ 7 ngày |
-| Weekly tier | `/data/backups/postgres/weekly/` | bản Chủ nhật, giữ 28 ngày |
+| MySQL dump | `/data/backups/mysql/<container>__<db>.sql.gz` | `mysqldump --single-transaction --routines --triggers`, giữ 7 ngày |
+| Weekly tier | `.../weekly/` của mỗi loại | bản Chủ nhật, giữ 28 ngày |
 | Config host | `/data/backups/configs/homelab-configs_YYYY-MM-DD.tar.gz` | `/etc/dokploy`, netplan, docker, sshd, fail2ban, smartd — giữ 14 ngày |
 | Quyền | `umask 077`, file 600 | chứa secret (Dokploy env/cert) |
 
@@ -43,6 +44,7 @@ journalctl -u homelab-backup.service -n 30
 |---|---|
 | `hello` | `https://hello.phucnn.io.vn/health` → 200 + body `"status":"ok"` |
 | `site` | `https://phucnn.io.vn/` → 200 + body chứa `Bechovang` |
+| `storagehub` | `https://storagehub.phucnn.io.vn/actuator/health` → 200 + `"status":"UP"` |
 | `cloudflare-edge` | `https://www.phucnn.io.vn/` → 200 |
 | `dokploy-postgres` | TCP `dokploy-postgres:5432` |
 | `dokploy-api` | `http://dokploy:3000/api/health` → 200 |
@@ -107,6 +109,7 @@ Nghiệm thu: không auth → **401**, có auth → **200**.
 | Dịch vụ | LAN | Tailscale | Internet |
 |---|---|---|---|
 | `phucnn.io.vn`, `www.phucnn.io.vn` | ✅ | ✅ | ✅ public (blog) |
+| `storagehub.phucnn.io.vn` | ✅ | ✅ | ✅ public (demo, seed công khai) |
 | `hello.phucnn.io.vn` | ✅ | ✅ | ✅ public |
 | `status.phucnn.io.vn` | ✅ | ✅ | ✅ public (read-only) |
 | `home.phucnn.io.vn` | ✅ | ✅ | ✅ public + basicAuth |

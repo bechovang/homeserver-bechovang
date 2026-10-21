@@ -2,7 +2,7 @@
 
 Biến PC cũ (i5-3470) thành **home server CI/CD**: deploy dự án cá nhân, self-hosted services, học DevOps.
 
-> Cập nhật: 2026-10-22 · 2 app đang chạy (`hello.phucnn.io.vn`, `phucnn.io.vn`) · Phase 6 🔄 — backup+drill ✅, Gatus+Slack ✅, Homepage ✅, reboot ✅; còn 48h (off-site: không làm)
+> Cập nhật: 2026-10-22 · 3 app (`hello.phucnn.io.vn`, `phucnn.io.vn`, `storagehub.phucnn.io.vn`) · Phase 6 🔄 — backup+drill ✅ (Postgres+MySQL), Gatus+Slack ✅, Homepage ✅, reboot ✅; còn 48h (off-site: không làm)
 
 ## 📌 Thông tin nhanh
 
@@ -16,6 +16,7 @@ Biến PC cũ (i5-3470) thành **home server CI/CD**: deploy dự án cá nhân,
 | **OS** | Ubuntu 26.04.1 LTS (kernel 7.0, UEFI) |
 | **Phần cứng** | i5-3470 · 8GB DDR3 (~6GB usable) · SSD 119GB · HDD 500GB |
 | **Domain** | `phucnn.io.vn` — NS Cloudflare (`bill`/`zainab`), Cloudflare Tunnel live, SSL **Full** |
+| **StorageHub** | `https://storagehub.phucnn.io.vn` — Spring Boot + React + MySQL (Dokploy Compose) |
 | **Blog** | `https://phucnn.io.vn` + `www` — static nginx từ `bechovang/bechovang.github.io` |
 | **App demo** | `https://hello.phucnn.io.vn` — CI/CD từ repo `bechovang/homeserver-bechovang` |
 | **Status page** | `https://status.phucnn.io.vn` — Gatus, 5 endpoint × 60s, alert Slack |
@@ -33,6 +34,7 @@ docs/
   05-phase5-app-cicd.md        # Runbook app mẫu + GitHub Actions → GHCR → Dokploy
   06-phase6-monitoring-backup.md  # Backup + restore drill + Gatus + reboot test
   07-deploying-apps.md         # Playbook: thêm app mới (static / Node) lên pipeline
+  08-storagehub.md             # StorageHub: compose 3 service, MySQL, CI/CD, seed công khai
 configs/
   netplan-00-installer-config.example.yaml   # Đã sanitize password
 apps/

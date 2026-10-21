@@ -42,6 +42,16 @@ endpoints:
     alerts:
       - type: slack
 
+  - name: storagehub
+    group: apps
+    url: "https://storagehub.phucnn.io.vn/actuator/health"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - '[BODY] == pat(*"status":"UP"*)'
+    alerts:
+      - type: slack
+
   - name: dokploy-postgres
     group: infra
     url: "tcp://dokploy-postgres:5432"

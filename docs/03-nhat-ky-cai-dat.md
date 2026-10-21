@@ -199,3 +199,15 @@ Còn treo: Dokploy admin **0 user** → chặn Phase 5; nên chuyển `cloudflar
 - Nghiệm thu: `/`, `www`, `/style.css`, `/gitflow.html` = 200; title "Blog của Bechovang"
 - Gatus: thêm endpoint `site`, đổi `cloudflare-edge` sang `https://www.phucnn.io.vn/` (200) — 5/5 xanh
 - Homepage: thêm link Blog; docs mới `07-deploying-apps.md` (playbook deploy app mới)
+
+## 2026-10-22 (đợt 8) — StorageHub: compose 3 service + MySQL
+
+- Repo `bechovang/StorageHub` (master `1de7ddc`); nhánh hạ tầng `be/phuc-ci` (tách khỏi `be/phuc` vì branch đó có commit payment/role riêng) → **PR #50**
+- Thêm: `backend/Dockerfile`, `frontend/Dockerfile` + `nginx.conf`, `docker-compose.prod.yml` (pull-only), `.github/workflows/deploy.yml`
+- CI build xanh từ nhánh: 2 image `ghcr.io/bechovang/storagehub/{backend,frontend}:latest|sha-…`
+- Dokploy compose `storagehub` = `8heFNSbnt-TR7XiX23Cfi`, appName `storagehub-myzyte`; domain `storagehub.phucnn.io.vn` (`OoCAz5AWqf--1GkxXcAEv`) service `frontend` port 80, HTTPS off
+- Env trong Dokploy: DB creds random, `JWT_SECRET` base64 48B, `SPRING_PROFILES_ACTIVE=dev` (seed), PayOS bật với kênh DEMO-MARKETPLACE
+- MySQL 8.4 volume `storagehub-myzyte_mysql_data`; Flyway chạy V1–V5 (5 migration, 2.9s)
+- Nghiệm thu: `/` 200, `/actuator/health` UP, login admin 200, `/users` 7 user, `/units` có dữ liệu, webhook 400 đúng (thiếu chữ ký)
+- Backup script mở rộng `mysqldump` + restore drill MySQL; Gatus thêm endpoint `storagehub`; Homepage thêm link
+- PayOS `confirm-webhook` API trả 400 "Webhook url invalid" → đổi URL trong dashboard my.payos.vn thay vì API
