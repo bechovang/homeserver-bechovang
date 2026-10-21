@@ -48,7 +48,19 @@ journalctl -u homelab-backup.service -n 30
 
 Chu kỳ 60s. **Alerting:** Slack, `failure-threshold: 3`, `success-threshold: 2`, `send-on-resolved: true`.
 
-Bật alert: điền `SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...` vào `/data/gatus/.env` (root:docker 640) rồi `docker restart gatus`. Config đã tham chiếu `${SLACK_WEBHOOK_URL}`; URL rỗng thì Gatus vẫn chạy bình thường, chỉ không gửi được khi có sự cố.
+Đã test end-to-end bằng stub HTTP nội bộ (chưa cần Slack thật):
+- target trả 500, interval 10s → sau 3 lần gửi payload Slack `color #DD0000` "has been triggered due to having failed 3 time(s)"
+- target trả 200 → sau 2 lần gửi `color #36A64F` "has been resolved after passing successfully 2 time(s)"
+
+Bật alert thật: điền `SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...` vào `/data/gatus/.env` (root:docker 640). **Phải tạo lại container** (`docker restart` không nạp lại `--env-file`):
+
+```bash
+docker rm -f gatus && docker run -d --name gatus --restart=always \
+  --network dokploy-network --env-file /data/gatus/.env \
+  -v /data/gatus/config:/config ghcr.io/twin/gatus:stable
+```
+
+Lưu ý: **App Credentials** (client id/secret, signing secret) không dùng được để gửi alert; cần **Incoming Webhook URL**. URL rỗng thì Gatus vẫn chạy, chỉ không gửi được khi có sự cố.
 
 ## 3. Homepage dashboard (Basic Auth)
 
