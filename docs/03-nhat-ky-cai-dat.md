@@ -187,3 +187,15 @@ Còn treo: Dokploy admin **0 user** → chặn Phase 5; nên chuyển `cloudflar
 - Reboot test: static IP giữ, docker/dokploy/traefik/postgres/cloudflared/gatus/hello tự lên, timers armed, SSH back sau ~40s
 - Không dùng `sudo` trực tiếp (user không có passwordless sudo) — thao tác root qua `docker run --privileged --pid=host -v /:/host alpine chroot /host ...`
 - Còn: alert webhook, off-site rclone, 48h theo dõi
+
+## 2026-10-22 (đợt 7) — Deploy blog tĩnh + hoàn thiện docs
+
+- Repo `bechovang/bechovang.github.io` (public, HTML tĩnh 24MB): thêm `Dockerfile` (nginx:1.29-alpine), `nginx.conf` (gzip, cache asset 7d, `try_files`), `.dockerignore`, workflow `deploy.yml`
+- Workflow: build/push `ghcr.io/bechovang/bechovang.github.io/site:{latest,sha-<sha>}` → Tailscale `tag:ci` → Dokploy API
+- Dokploy app `site` = `IeeRmR6pwlUiknGUr09vO` (`site-otvqqb`), image nginx, port 80
+- Domain: `phucnn.io.vn` + `www.phucnn.io.vn` (`XJTjGJeQ-eSIM5-ACnrZk`, `Mi7d5T8HhMe5q7xNw9Sk1`), HTTPS off
+- Secrets/vars set cho repo: `DOKPLOY_URL`, `DOKPLOY_API_KEY`, `DOKPLOY_APP_ID`, `TS_OAUTH_CLIENT_ID/SECRET`, `DEPLOY_ENABLED=true`
+- GHCR package của repo public → server pull anonymous OK (khác với repo private thời điểm Phase 5)
+- Nghiệm thu: `/`, `www`, `/style.css`, `/gitflow.html` = 200; title "Blog của Bechovang"
+- Gatus: thêm endpoint `site`, đổi `cloudflare-edge` sang `https://www.phucnn.io.vn/` (200) — 5/5 xanh
+- Homepage: thêm link Blog; docs mới `07-deploying-apps.md` (playbook deploy app mới)

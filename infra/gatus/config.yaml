@@ -1,4 +1,4 @@
-# Gatus — status page cho homelab (config-as-code, mount vào /config/config.yaml)
+# Gatus - status page cho homelab (config-as-code, mount vao /config/config.yaml)
 storage:
   type: memory
 
@@ -23,12 +23,22 @@ endpoints:
     alerts:
       - type: slack
 
-  - name: cloudflare-edge
-    group: infra
+  - name: site
+    group: apps
     url: "https://phucnn.io.vn/"
     interval: 60s
     conditions:
-      - "[STATUS] == 404"   # chưa có app ở apex; 404 = Tunnel + Traefik sống
+      - "[STATUS] == 200"
+      - "[BODY] == pat(*Bechovang*)"
+    alerts:
+      - type: slack
+
+  - name: cloudflare-edge
+    group: infra
+    url: "https://www.phucnn.io.vn/"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
     alerts:
       - type: slack
 

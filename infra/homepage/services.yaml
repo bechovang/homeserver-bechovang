@@ -17,6 +17,10 @@
         description: homelab-01 - 100.83.245.0
 
 - Apps:
+    - Blog:
+        icon: si:githubpages
+        href: https://phucnn.io.vn
+        description: bechovang.github.io - nginx container
     - hello:
         icon: si:github
         href: https://hello.phucnn.io.vn

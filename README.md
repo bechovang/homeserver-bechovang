@@ -2,7 +2,7 @@
 
 Biến PC cũ (i5-3470) thành **home server CI/CD**: deploy dự án cá nhân, self-hosted services, học DevOps.
 
-> Cập nhật: 2026-10-22 · Phase 5 ✅ (CI/CD + rollback) · Phase 6 🔄 — backup+restore drill ✅, status page ✅, reboot test ✅; còn alert webhook, off-site, 48h
+> Cập nhật: 2026-10-22 · 2 app đang chạy (`hello.phucnn.io.vn`, `phucnn.io.vn`) · Phase 6 🔄 — backup+drill ✅, Gatus+Slack ✅, Homepage ✅, reboot ✅; còn 48h (off-site: không làm)
 
 ## 📌 Thông tin nhanh
 
@@ -16,8 +16,9 @@ Biến PC cũ (i5-3470) thành **home server CI/CD**: deploy dự án cá nhân,
 | **OS** | Ubuntu 26.04.1 LTS (kernel 7.0, UEFI) |
 | **Phần cứng** | i5-3470 · 8GB DDR3 (~6GB usable) · SSD 119GB · HDD 500GB |
 | **Domain** | `phucnn.io.vn` — NS Cloudflare (`bill`/`zainab`), Cloudflare Tunnel live, SSL **Full** |
+| **Blog** | `https://phucnn.io.vn` + `www` — static nginx từ `bechovang/bechovang.github.io` |
 | **App demo** | `https://hello.phucnn.io.vn` — CI/CD từ repo `bechovang/homeserver-bechovang` |
-| **Status page** | `https://status.phucnn.io.vn` — Gatus, 4 endpoint × 60s, alert Slack |
+| **Status page** | `https://status.phucnn.io.vn` — Gatus, 5 endpoint × 60s, alert Slack |
 | **Dashboard** | `https://home.phucnn.io.vn` — Homepage, basic auth |
 | **Backup** | `/data/backups` — timer 02:30 daily, restore drill CN 03:30 |
 
@@ -31,6 +32,7 @@ docs/
   04-phase4-domain-cloudflare-tunnel.md  # Runbook domain + Cloudflare Tunnel (baseline đã audit)
   05-phase5-app-cicd.md        # Runbook app mẫu + GitHub Actions → GHCR → Dokploy
   06-phase6-monitoring-backup.md  # Backup + restore drill + Gatus + reboot test
+  07-deploying-apps.md         # Playbook: thêm app mới (static / Node) lên pipeline
 configs/
   netplan-00-installer-config.example.yaml   # Đã sanitize password
 apps/

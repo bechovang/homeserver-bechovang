@@ -42,7 +42,8 @@ journalctl -u homelab-backup.service -n 30
 | Endpoint | Kiểm tra |
 |---|---|
 | `hello` | `https://hello.phucnn.io.vn/health` → 200 + body `"status":"ok"` |
-| `cloudflare-edge` | `https://phucnn.io.vn/` → 404 (Tunnel + Traefik sống) |
+| `site` | `https://phucnn.io.vn/` → 200 + body chứa `Bechovang` |
+| `cloudflare-edge` | `https://www.phucnn.io.vn/` → 200 |
 | `dokploy-postgres` | TCP `dokploy-postgres:5432` |
 | `dokploy-api` | `http://dokploy:3000/api/health` → 200 |
 
@@ -105,6 +106,7 @@ Nghiệm thu: không auth → **401**, có auth → **200**.
 
 | Dịch vụ | LAN | Tailscale | Internet |
 |---|---|---|---|
+| `phucnn.io.vn`, `www.phucnn.io.vn` | ✅ | ✅ | ✅ public (blog) |
 | `hello.phucnn.io.vn` | ✅ | ✅ | ✅ public |
 | `status.phucnn.io.vn` | ✅ | ✅ | ✅ public (read-only) |
 | `home.phucnn.io.vn` | ✅ | ✅ | ✅ public + basicAuth |

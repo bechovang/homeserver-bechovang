@@ -114,11 +114,12 @@ Giới hạn: mỗi service **1 replica**; không build trên server; tạm dừ
 - Dokploy: project `personal` / app `hello` (Docker provider), domain `hello.phucnn.io.vn` (HTTPS off, cert none)
 - Nghiệm thu: push → tự deploy ✅ · CI đỏ → build/deploy **skip** ✅ · rollback `sha-<sha>` ✅ · `/health` qua tunnel 200 ✅
 - Chưa tạo PostgreSQL service — app hello không cần DB; làm khi app đầu tiên cần
-- Chi tiết + ID tài nguyên: [`05-phase5-app-cicd.md`](05-phase5-app-cicd.md)
+- **App thứ 2 (22/10):** blog tĩnh `bechovang.github.io` → `https://phucnn.io.vn` + `www` (nginx, image 24MB) qua cùng pipeline
+- Chi tiết + ID tài nguyên: [`05-phase5-app-cicd.md`](05-phase5-app-cicd.md) · playbook chung: [`07-deploying-apps.md`](07-deploying-apps.md)
 
 ### 🔄 Phase 6 — Monitoring + Backup + Dashboard + nghiệm thu (22/10)
 - **Backup** ✅ `homelab-backup.timer` 02:30 (pg_dump -Fc + configs tar, retention 7/28/14 ngày), drill Chủ nhật 03:30 → restore thật 67 bảng
-- **Monitoring** ✅ **Gatus** thay Uptime Kuma (config-as-code) — `https://status.phucnn.io.vn`, 4 endpoint × 60s; alert **Slack #homeserver-noti** (đã test DOWN)
+- **Monitoring** ✅ **Gatus** thay Uptime Kuma (config-as-code) — `https://status.phucnn.io.vn`, 5 endpoint × 60s; alert **Slack #homeserver-noti** (đã test DOWN)
 - **Homepage** ✅ `https://home.phucnn.io.vn` + Traefik **basicAuth** (bcrypt cost 12), config trong `infra/homepage/`
 - **Reboot test** ✅ static IP, Docker, Dokploy, cloudflared, hello, gatus, homepage, timers tự lên sau ~40s
 - Off-site backup: **user chọn không làm** (rủi ro đã ghi nhận). Còn: Slack URL + 48h RAM/disk
