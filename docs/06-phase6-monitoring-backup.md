@@ -48,7 +48,7 @@ Chưa có off-site (rclone) — cần credential cloud; HDD 2009 vẫn là bản
 | `dokploy-postgres` | TCP `dokploy-postgres:5432` |
 | `dokploy-api` | `http://dokploy:3000/api/health` → 200 |
 
-Lặp 60s. Alerting đang **tắt** — bật bằng cách điền `alerting.telegram.token/id` (hoặc Discord/Slack) vào config rồi restart container:
+Lặp 60s. Alerting đang **tắt**. Credential đặt trong `/data/gatus/.env` (root, `chmod 600`, đã tạo template) và container chạy với `--env-file`; config dùng `${TELEGRAM_TOKEN}`. Mẫu biến: [`.env.example`](../.env.example). Bật alert rồi restart:
 
 ```bash
 docker restart gatus
