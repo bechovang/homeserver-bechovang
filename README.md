@@ -2,7 +2,7 @@
 
 Biến PC cũ (i5-3470) thành **home server CI/CD**: deploy dự án cá nhân, self-hosted services, học DevOps.
 
-> Cập nhật: 2026-10-21 · Phase 4 ✅ (`phucnn.io.vn` Active, tunnel 4 conn) · Phase 3 ✅ (admin + 2FA) · Phase 5: CI build xanh, chờ credential deploy
+> Cập nhật: 2026-10-22 · Phase 5 ✅ — push → CI → GHCR → Dokploy → `https://hello.phucnn.io.vn`; CI đỏ chặn deploy; rollback OK
 
 ## 📌 Thông tin nhanh
 
@@ -16,6 +16,7 @@ Biến PC cũ (i5-3470) thành **home server CI/CD**: deploy dự án cá nhân,
 | **OS** | Ubuntu 26.04.1 LTS (kernel 7.0, UEFI) |
 | **Phần cứng** | i5-3470 · 8GB DDR3 (~6GB usable) · SSD 119GB · HDD 500GB |
 | **Domain** | `phucnn.io.vn` — NS Cloudflare (`bill`/`zainab`), Cloudflare Tunnel live, SSL **Full** |
+| **App demo** | `https://hello.phucnn.io.vn` — CI/CD từ repo `bechovang/homeserver-bechovang` |
 
 ## 🗂 Cấu trúc repo
 
@@ -44,7 +45,7 @@ deploy-CICD/
 | 2 | Tailscale (`homelab-01` = 100.83.245.0) | ✅ Xong |
 | 3 | Dokploy v0.30.8 — admin `phuchcm2006@gmail.com` + 2FA | ✅ Xong |
 | 4 | Domain `phucnn.io.vn` + Cloudflare Tunnel — **Active**, `cloudflared` 4 conn, `*` → `dokploy-traefik:80` | ✅ Xong |
-| 5 | App `hello` + CI/CD — test/build GHCR xanh; chờ API key Dokploy + Tailscale OAuth để bật deploy | 🔄 |
+| 5 | App `hello` + CI/CD — push → test → GHCR → Dokploy tự deploy; CI đỏ chặn deploy; rollback `sha-…` OK | ✅ Xong |
 | 6 | Uptime Kuma + backup tự động + nghiệm thu | ⏳ |
 
 ## 🎯 Kiến trúc đích

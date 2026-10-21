@@ -108,15 +108,13 @@ Giới hạn: mỗi service **1 replica**; không build trên server; tạm dừ
 - Nghiệm thu: host bất kỳ → **404 Traefik**, `http://` → **301 https**, không 502/1033
 - Chi tiết lệnh, biến thể fallback và bảng lỗi: [`04-phase4-domain-cloudflare-tunnel.md`](04-phase4-domain-cloudflare-tunnel.md)
 
-### ⏳ Phase 5 — App đầu tiên + CI/CD
-1. Dokploy: tạo Project `personal` → PostgreSQL service → tạo DB + user riêng cho app
-2. App mẫu (Next.js hoặc API nhỏ) push lên GitHub, có `Dockerfile` (multi-stage, non-root, standalone output)
-3. GitHub Actions workflow:
-   - job build: checkout → test → `docker/build-push-action` push `ghcr.io/<user>/<repo>:latest` + `:sha-<git sha>` (dùng `GITHUB_TOKEN`)
-   - job deploy: `tailscale/github-action@v4` (OAuth client, tag `tag:ci`) join tailnet → `curl -X POST $DOKPLOY_URL/api/application.deploy -H "x-api-key: ..."` với `DOKPLOY_URL=http://100.83.245.0:3000`
-   - Secrets cần: `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`, `DOKPLOY_API_KEY`, `DOKPLOY_APP_ID`
-4. Test: push code → thấy image mới → app tự update; test rollback về tag `sha-...` cũ
-5. Tailscale ACL cho OAuth client: chỉ được gọi tới `100.83.245.0:3000`
+### ✅ Phase 5 — App đầu tiên + CI/CD (XONG 22/10 01:52)
+- App `apps/hello` — Node 24 zero-dependency, non-root, healthcheck, 5 test (`node --test`)
+- CI: `test → build GHCR (:latest + :sha-<sha>) → deploy` qua Tailscale OAuth `tag:ci` → `POST /api/application.deploy`
+- Dokploy: project `personal` / app `hello` (Docker provider), domain `hello.phucnn.io.vn` (HTTPS off, cert none)
+- Nghiệm thu: push → tự deploy ✅ · CI đỏ → build/deploy **skip** ✅ · rollback `sha-<sha>` ✅ · `/health` qua tunnel 200 ✅
+- Chưa tạo PostgreSQL service — app hello không cần DB; làm khi app đầu tiên cần
+- Chi tiết + ID tài nguyên: [`05-phase5-app-cicd.md`](05-phase5-app-cicd.md)
 
 ### ⏳ Phase 6 — Monitoring + Backup + nghiệm thu
 - Uptime Kuma (Docker, publish `127.0.0.1:3001` hoặc LAN-only), monitor: apps, `/health`, TCP PostgreSQL, disk usage; alert Telegram/Discord
@@ -129,13 +127,13 @@ Giới hạn: mỗi service **1 replica**; không build trên server; tạm dừ
 
 - [ ] Reboot máy: tự lên mạng WiFi, toàn bộ service tự start
 - [ ] SSH qua Tailscale từ mạng ngoài (4G) OK
-- [ ] Push code lên main → CI xanh → app tự deploy bản mới
-- [ ] CI đỏ → KHÔNG deploy
-- [ ] App public qua domain HTTPS (Cloudflare Tunnel)
+- [x] Push code lên main → CI xanh → app tự deploy bản mới
+- [x] CI đỏ → KHÔNG deploy
+- [x] App public qua domain HTTPS (Cloudflare Tunnel)
 - [ ] PostgreSQL không reachable từ Internet/LAN ngoài Dokploy network
 - [ ] Restart container → data không mất
 - [ ] Restore 1 bản pg_dump thành công
-- [ ] Rollback về image cũ OK
+- [x] Rollback về image cũ OK
 - [ ] Uptime Kuma cảnh báo khi stop app
 - [ ] RAM/disk trong ngưỡng sau 48h chạy
 

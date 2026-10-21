@@ -122,10 +122,25 @@ RemoteAddr 10.0.1.4 (cloudflared) → Traefik → container app
 ```
 Tức Cloudflare Tunnel → Traefik → Dokploy app → container đã thông; chỉ còn thay image.
 
-### Còn chờ để chốt Phase 5
-1. GHCR package `hello` → **Public** (hoặc PAT `read:packages`), rồi:
-   - `application.saveDockerProvider` = `ghcr.io/bechovang/homeserver-bechovang/hello:latest`
-   - `domain.update` port `80` → `3000`
-   - deploy lại → `/health` = `{"status":"ok"}`
-2. Tailscale OAuth client `tag:ci` (hoặc auth key) → set `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`, thêm ACL `tag:ci → homelab-01:3000`, bật variable `DEPLOY_ENABLED=true`.
-3. Push commit → xác nhận deploy job chạy, đổi image tag `sha-...` để test rollback.
+## 10. Kết quả cuối — Phase 5 đóng 22/10/2026 01:52 +07
+
+| Hạng mục | Kết quả |
+|---|---|
+| GHCR | package `homeserver-bechovang/hello` **Public** → server pull anonymous OK |
+| Dokploy image | `ghcr.io/bechovang/homeserver-bechovang/hello:latest` |
+| Domain | port `80` → **3000**, HTTPS off, cert none |
+| Env | `APP_VERSION=latest` (hiển thị ở `/api/info`) |
+| Container | `hello-o1vegt.1.*` healthy, image `:latest` |
+| `https://hello.phucnn.io.vn/health` | `{"status":"ok"}` |
+| `https://hello.phucnn.io.vn/api/info` | `version: latest`, `node v24.22.1` |
+| Tailscale | OAuth client tag `tag:ci`; ACL thêm `"tagOwners": {"tag:ci": ["autogroup:admin"]}` |
+| Deploy job | chạy xanh: join tailnet → `POST /api/application.deploy` |
+| CI đỏ | test fail → build **skipped**, deploy **skipped** (PR #1 test, đã xoá) |
+| Rollback | `saveDockerProvider` → `:sha-0df7617…` → container chạy đúng tag → trả lại `:latest` |
+
+GitHub: secrets `DOKPLOY_URL`, `DOKPLOY_API_KEY`, `DOKPLOY_APP_ID`, `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`; variable `DEPLOY_ENABLED=true`.
+
+Lưu ý vận hành:
+- Deploy job dùng image tag đang cấu hình trong Dokploy (`:latest`). Rollback = đổi tag trong Dokploy rồi deploy.
+- Repo hiện **public** (docs lộ IP LAN/Tailscale/MAC — không có secret); package public là điều kiện để server pull không cần registry creds.
+- Muốn build theo đúng commit: đổi image sang `:sha-<sha>` bằng API trong job deploy (hiện chưa làm).

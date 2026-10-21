@@ -166,3 +166,14 @@ docker run -d --name cloudflared --restart=always --network dokploy-network \
 - MCP `cloudflare-api` khai báo tại `~/.omp/agent/mcp.json` (`https://mcp.cloudflare.com/mcp`, Bearer `${CLOUDFLARE_API_TOKEN}`); token hiện chưa có `user:read` → handshake trả 403 `insufficient_scope`; thêm quyền **User → User Details → Read** nếu muốn dùng MCP
 
 Còn treo: Dokploy admin **0 user** → chặn Phase 5; nên chuyển `cloudflared` sang Dokploy quản lý sau khi có admin.
+
+## 2026-10-22 (đợt 5) — Phase 5: app + CI/CD
+
+- Dokploy admin đã tạo (`phuchcm2006@gmail.com`, 2FA bật — DB `user.two_factor_enabled = t`)
+- Repo `bechovang/homeserver-bechovang` (public), app `apps/hello` zero-dependency
+- CI: `node --test` → `docker/build-push-action` push `ghcr.io/bechovang/homeserver-bechovang/hello:{latest,sha-<sha>}` → job deploy join Tailscale (`tag:ci`) → `POST http://100.83.245.0:3000/api/application.deploy`
+- Dokploy: project `personal` (`X816lHAiV3ff5RdD8iZ3O`), app `hello` (`qJIbE8SOBTDgbFDSAr7dM`), domain `hello.phucnn.io.vn` port 3000, HTTPS off
+- GHCR package phải để **Public** thì server mới pull được (private → `unauthorized`)
+- Tailscale ACL cần `"tagOwners": {"tag:ci": ["autogroup:admin"]}` trước khi OAuth client join được
+- Nghiệm thu: `/health` 200, `version=latest`; test fail trên PR → build+deploy skip; rollback `:sha-0df7617…` chạy đúng rồi trả `:latest`
+- GitHub secrets: `DOKPLOY_URL`, `DOKPLOY_API_KEY`, `DOKPLOY_APP_ID`, `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`; variable `DEPLOY_ENABLED=true`
