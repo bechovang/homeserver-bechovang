@@ -70,7 +70,8 @@ Secret không nằm trong repo; nằm trong Dokploy DB (và trong bản backup c
 ## 6. CI/CD
 
 - PR → chỉ test (`mvn -B test`, `npm ci && npm run build`), không push image.
-- Push `master` + `DEPLOY_ENABLED=true` → build 2 image GHCR → join tailnet `tag:ci` → `POST /api/compose.deploy {composeId}`.
+- Push `master` + `DEPLOY_ENABLED=true` → build 2 image GHCR (`:latest` + `:sha-<commit>`) → join tailnet `tag:ci` → **pin compose sang `:sha-<commit>`** (`compose.update`) → `compose.deploy`.
+- Vì sao phải pin: `docker compose up -d` với `:latest` không recreate container khi tag không đổi. Pin sha đảm bảo mỗi commit tạo container mới và rollback chỉ là chạy lại workflow cũ/đổi tag.
 - Rollback: trong Dokploy đổi tag compose sang `:sha-<commit>` cũ rồi deploy, hoặc `compose.update` rồi `compose.deploy`.
 - Secrets repo: `DOKPLOY_URL`, `DOKPLOY_API_KEY`, `DOKPLOY_COMPOSE_ID`, `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`.
 
@@ -97,7 +98,7 @@ sudo systemctl start homelab-backup-verify.service
 
 ## 9. Vấn đề đã biết
 
-1. **PayOS `confirm-webhook` API trả `400 Webhook url invalid`** — PayOS probe URL và nhận 400 vì payload rỗng không có chữ ký. Webhook thật vẫn hoạt động; đổi URL trong dashboard my.payos.vn (đã có ngrok URL trước đó) là đủ.
+1. **PayOS `confirm-webhook` (đã sửa).** PayOS xác thực URL bằng cách POST một payload mẫu **có chữ ký hợp lệ** với `orderCode = 123`. Backend cũ coi orderCode ngoài dải `100000+paymentId` là lỗi → trả 400 → dashboard báo "Webhook url invalid". Đã sửa: orderCode lạ + chữ ký hợp lệ ⇒ coi là probe, bỏ qua, trả `{"code":"00","desc":"success"}` (200); chữ ký sai vẫn 400. Đổi hành vi ở `PayOsPaymentGateway.verifyWebhook` + `PaymentServiceImpl.handlePayOsWebhook`, test `ignoresForeignOrderCodeAsProbe`.
 2. **Attachment upload chưa tồn tại** (Sprint 2): seed có `*PhotoUrl` `/storage/contracts/...` nhưng không có endpoint/static mapping → ảnh hợp đồng 404.
 3. `springdoc` vẫn bật (`/swagger-ui.html`) — có thể tắt bằng `SPRINGDOC_API_DOCS_ENABLED=false` nếu muốn.
 4. JVM heap mặc định 70% RAM container; container chưa giới hạn RAM nên JVM thấy host 6GB → có thể thêm `mem_limit` nếu cần.
