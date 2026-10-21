@@ -116,11 +116,12 @@ Giới hạn: mỗi service **1 replica**; không build trên server; tạm dừ
 - Chưa tạo PostgreSQL service — app hello không cần DB; làm khi app đầu tiên cần
 - Chi tiết + ID tài nguyên: [`05-phase5-app-cicd.md`](05-phase5-app-cicd.md)
 
-### 🔄 Phase 6 — Monitoring + Backup + nghiệm thu (22/10: 3/4 mục xong)
+### 🔄 Phase 6 — Monitoring + Backup + Dashboard + nghiệm thu (22/10)
 - **Backup** ✅ `homelab-backup.timer` 02:30 (pg_dump -Fc + configs tar, retention 7/28/14 ngày), drill Chủ nhật 03:30 → restore thật 67 bảng
-- **Monitoring** ✅ **Gatus** thay Uptime Kuma (config-as-code, không cần UI/NCC) — `https://status.phucnn.io.vn`, 4 endpoint mỗi 60s
-- **Reboot test** ✅ static IP, Docker, Dokploy, cloudflared, hello, gatus, timers tự lên sau ~40s
-- Còn: alert Telegram/Discord, off-site backup (rclone), 48h RAM/disk, Homepage (chờ lớp auth)
+- **Monitoring** ✅ **Gatus** thay Uptime Kuma (config-as-code) — `https://status.phucnn.io.vn`, 4 endpoint × 60s; alert Slack (chờ webhook URL)
+- **Homepage** ✅ `https://home.phucnn.io.vn` + Traefik **basicAuth** (bcrypt cost 12), config trong `infra/homepage/`
+- **Reboot test** ✅ static IP, Docker, Dokploy, cloudflared, hello, gatus, homepage, timers tự lên sau ~40s
+- Off-site backup: **user chọn không làm** (rủi ro đã ghi nhận). Còn: Slack URL + 48h RAM/disk
 - Chi tiết: [`06-phase6-monitoring-backup.md`](06-phase6-monitoring-backup.md)
 
 ## 6. Checklist nghiệm thu (Definition of Done)

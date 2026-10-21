@@ -1,0 +1,23 @@
+# Copy to /etc/dokploy/traefik/dynamic/homepage.yml on the server.
+# Generate the hash with: docker run --rm httpd:alpine htpasswd -nbB -C 12 admin '<password>'
+# Never commit the real file (it contains the credential hash).
+http:
+  routers:
+    homepage-router:
+      rule: Host(`home.phucnn.io.vn`)
+      service: homepage-service
+      middlewares:
+        - homepage-auth
+      entryPoints:
+        - web
+  services:
+    homepage-service:
+      loadBalancer:
+        servers:
+          - url: http://homepage:3000
+        passHostHeader: true
+  middlewares:
+    homepage-auth:
+      basicAuth:
+        users:
+          - "admin:REPLACE_WITH_BCRYPT_HASH"

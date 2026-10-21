@@ -3,15 +3,14 @@ storage:
   type: memory
 
 alerting:
-  # Bật khi có webhook. Ví dụ Telegram:
-  # telegram:
-  #   token: "${TELEGRAM_TOKEN}"
-  #   id: "${TELEGRAM_CHAT_ID}"
-  #   default-alert:
-  #     enabled: true
-  #     failure-threshold: 3
-  #     success-threshold: 2
-  #     send-on-resolved: true
+  slack:
+    webhook-url: "${SLACK_WEBHOOK_URL}"
+    default-alert:
+      enabled: true
+      description: "homelab health"
+      failure-threshold: 3
+      success-threshold: 2
+      send-on-resolved: true
 
 endpoints:
   - name: hello
@@ -22,8 +21,7 @@ endpoints:
       - "[STATUS] == 200"
       - '[BODY] == pat(*"status":"ok"*)'
     alerts:
-      - type: telegram
-        enabled: false
+      - type: slack
 
   - name: cloudflare-edge
     group: infra
@@ -31,6 +29,8 @@ endpoints:
     interval: 60s
     conditions:
       - "[STATUS] == 404"   # chưa có app ở apex; 404 = Tunnel + Traefik sống
+    alerts:
+      - type: slack
 
   - name: dokploy-postgres
     group: infra
@@ -38,10 +38,14 @@ endpoints:
     interval: 60s
     conditions:
       - "[CONNECTED] == true"
+    alerts:
+      - type: slack
 
   - name: dokploy-api
     group: infra
-    url: "http://dokploy:3000/api/health"   # trong dokploy-network
+    url: "http://dokploy:3000/api/health"
     interval: 60s
     conditions:
       - "[STATUS] == 200"
+    alerts:
+      - type: slack

@@ -1,10 +1,11 @@
-# 06 — Phase 6: Monitoring + Backup + nghiệm thu
+# 06 — Phase 6: Monitoring + Backup + Dashboard + nghiệm thu
 
-> Trạng thái 22/10/2026 02:10 +07: backup + restore drill ✅, status page ✅, reboot test ✅. Còn 48h theo dõi tài nguyên và alert webhook.
+> Trạng thái 22/10/2026 03:00 +07: backup + restore drill ✅, Gatus status page ✅, Homepage basic-auth ✅, reboot test ✅.
+> Còn: Slack webhook URL, 48h theo dõi. Off-site backup: **user quyết định không làm** (rủi ro được ghi nhận ở mục 5).
 
 ## 1. Backup (`scripts/homelab-backup.sh`)
 
-Cài tại `/usr/local/sbin/homelab-backup.sh`, chạy root qua systemd.
+Cài `/usr/local/sbin/homelab-backup.sh`, chạy root qua systemd.
 
 | Thành phần | Đường dẫn | Ghi chú |
 |---|---|---|
@@ -13,33 +14,30 @@ Cài tại `/usr/local/sbin/homelab-backup.sh`, chạy root qua systemd.
 | Config host | `/data/backups/configs/homelab-configs_YYYY-MM-DD.tar.gz` | `/etc/dokploy`, netplan, docker, sshd, fail2ban, smartd — giữ 14 ngày |
 | Quyền | `umask 077`, file 600 | chứa secret (Dokploy env/cert) |
 
-- Tự phát hiện container `postgres:*` đang chạy, đọc `POSTGRES_USER` rồi fallback `dokploy`/`postgres`.
-- Timer: `homelab-backup.timer` **02:30 daily** (`Persistent=true`, `RandomizedDelaySec=300`).
-- Drill: `homelab-backup-verify.timer` **Chủ nhật 03:30** → restore dump mới nhất vào DB tạm `restore_check_<pid>`, đếm bảng, drop.
+- Tự phát hiện container `postgres:*`, đọc `POSTGRES_USER` rồi fallback `dokploy`/`postgres`.
+- `homelab-backup.timer` **02:30 daily** (`Persistent=true`, `RandomizedDelaySec=300`).
+- `homelab-backup-verify.timer` **Chủ nhật 03:30** → restore dump mới nhất vào DB tạm `restore_check_<pid>`, đếm bảng, drop.
 
-Kết quả lần chạy thật:
+Kết quả chạy thật:
 ```
 postgres dump ok: ...__dokploy.dump (196K)
 configs archived: homelab-configs_2026-10-22.tar.gz (100K)
 VERIFY OK ...__dokploy.dump -> 67 tables in restore_check_107171 (dropped)
 ```
 
-Lệnh thủ công:
 ```bash
 sudo systemctl start homelab-backup.service          # backup ngay
 sudo systemctl start homelab-backup-verify.service   # drill ngay
 journalctl -u homelab-backup.service -n 30
 ```
 
-Chưa có off-site (rclone) — cần credential cloud; HDD 2009 vẫn là bản duy nhất nên đây là việc còn hở.
+## 2. Monitoring — Gatus + Slack
 
-## 2. Monitoring — Gatus (thay Uptime Kuma)
+**Lý do đổi từ Uptime Kuma:** Kuma không có API/CLI tạo monitor/admin, phải làm tay qua UI; Gatus config-as-code, version trong repo, tự động hoá hoàn toàn.
 
-**Lý do đổi:** Uptime Kuma không có API/CLI để tạo monitor và admin, phải làm tay qua UI ~10 phút; Gatus cấu hình bằng YAML, version trong repo, tự động hoá hoàn toàn. Cùng mục tiêu: check định kỳ + cảnh báo.
-
-- Container `gatus` (`ghcr.io/twin/gatus:stable`), `--restart=always`, `--network dokploy-network`, mount `/data/gatus/config:/config`.
-- Config: [`infra/gatus/config.yaml`](../infra/gatus/config.yaml) → `/data/gatus/config/config.yaml` trên server.
-- Public status page: **https://status.phucnn.io.vn** (ingress riêng trong tunnel → `http://gatus:8080`, không qua Traefik).
+- Container `gatus` (`ghcr.io/twin/gatus:stable`), `restart=always`, `network dokploy-network`, `--env-file /data/gatus/.env`, mount `/data/gatus/config`.
+- Config: [`infra/gatus/config.yaml`](../infra/gatus/config.yaml).
+- Public status page: **https://status.phucnn.io.vn** (ingress tunnel → `http://gatus:8080`, không qua Traefik).
 
 | Endpoint | Kiểm tra |
 |---|---|
@@ -48,42 +46,56 @@ Chưa có off-site (rclone) — cần credential cloud; HDD 2009 vẫn là bản
 | `dokploy-postgres` | TCP `dokploy-postgres:5432` |
 | `dokploy-api` | `http://dokploy:3000/api/health` → 200 |
 
-Lặp 60s. Alerting đang **tắt**. Credential đặt trong `/data/gatus/.env` (root, `chmod 600`, đã tạo template) và container chạy với `--env-file`; config dùng `${TELEGRAM_TOKEN}`. Mẫu biến: [`.env.example`](../.env.example). Bật alert rồi restart:
+Chu kỳ 60s. **Alerting:** Slack, `failure-threshold: 3`, `success-threshold: 2`, `send-on-resolved: true`.
 
-```bash
-docker restart gatus
-```
+Bật alert: điền `SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...` vào `/data/gatus/.env` (root:docker 640) rồi `docker restart gatus`. Config đã tham chiếu `${SLACK_WEBHOOK_URL}`; URL rỗng thì Gatus vẫn chạy bình thường, chỉ không gửi được khi có sự cố.
 
-## 3. Reboot test (22/10 02:07)
+## 3. Homepage dashboard (Basic Auth)
 
-Lệnh: `systemctl reboot` (qua container privileged vì user không có sudo passwordless).
+- Container `homepage` (`ghcr.io/gethomepage/homepage:latest`), `restart=always`, `network dokploy-network`, mount `/data/homepage/config:/app/config` (rw — Homepage cần tạo `config/logs`).
+- Env `HOMEPAGE_ALLOWED_HOSTS=home.phucnn.io.vn`.
+- URL: **https://home.phucnn.io.vn** — Traefik **basicAuth** (bcrypt cost 12) từ file động `/etc/dokploy/traefik/dynamic/homepage.yml`.
+- Config: [`infra/homepage/`](../infra/homepage) (`settings.yaml`, `services.yaml`, `widgets.yaml`); file Traefik mẫu: `traefik-homepage.example.yml` (hash thật **không** commit).
+- Đổi mật khẩu:
+  ```bash
+  docker run --rm httpd:alpine htpasswd -nbB -C 12 admin 'newpass'
+  # dán dòng "admin:$2y$12$..." vào users[0] trong /etc/dokploy/traefik/dynamic/homepage.yml
+  ```
+- Không widget Docker (tránh mount docker.sock = root-equivalent); chỉ link + search + datetime + resource của container.
+
+Nghiệm thu: không auth → **401**, có auth → **200**.
+
+## 4. Reboot test (22/10 02:07)
 
 | Kiểm tra sau reboot | Kết quả |
 |---|---|
 | WiFi static IP | `192.168.1.140/24` ✅ |
 | SSH key-only | login lại sau ~40s ✅ |
-| Docker + Dokploy + Traefik + Postgres | healthy ✅ |
+| Docker/Dokploy/Traefik/Postgres | healthy ✅ |
 | `cloudflared` | Up, tunnel 4 conn ✅ |
-| `hello` app | healthy, `/health` 200 ✅ |
-| `gatus` + status page | 200 ✅ |
-| Timer backup | next 02:32, verify 25/10 ✅ |
+| `hello` `/health` · `status` `/` · `home` (auth) | 200 ✅ |
+| Backup timers | armed ✅ |
 | tailscaled / ufw / fail2ban / smartd | active ✅ |
-| RAM | 1541/6011 MB |
+| RAM | ~1.5/6 GB ✅ |
 
-## 4. Việc còn lại
+## 5. Việc còn lại
 
-1. **Alert webhook** (Telegram/Discord) → bật alerting trong Gatus.
-2. **Off-site backup** (rclone) — bắt buộc theo nguyên tắc "bản backup quan trọng phải ra khỏi máy".
-3. **48h theo dõi** RAM/disk sau khi chạy đủ tải.
-4. Homepage dashboard: **hoãn** — chưa có lớp auth; public hoá sẽ lộ toàn bộ link nội bộ. Làm sau khi có Cloudflare Access (service token/OTP) hoặc chỉ chạy LAN.
-5. `:3000` vẫn publish ra LAN (Docker bypass ufw) — siết bằng chain `DOCKER-USER` nếu cần.
+1. **Slack webhook URL** → điền `.env`, restart gatus, test DOWN/RESOLVED.
+2. **Off-site backup: không làm** (user quyết định). Rủi ro chấp nhận: HDD 2009 là bản sao duy nhất; hỏng ổ/mất máy là mất toàn bộ dump + config.
+3. **48h RAM/disk**: đo lại sau 24h/48h (không đặt timer report theo yêu cầu).
+4. `:3000` vẫn publish ra LAN (Docker bypass ufw) — siết bằng chain `DOCKER-USER` nếu cần.
 
-## 5. Access policy hiện tại
+## 6. Access policy hiện tại
 
 | Dịch vụ | LAN | Tailscale | Internet |
 |---|---|---|---|
-| `hello.phucnn.io.vn` | ✅ | ✅ | ✅ công khai |
-| `status.phucnn.io.vn` | ✅ | ✅ | ✅ công khai (read-only) |
+| `hello.phucnn.io.vn` | ✅ | ✅ | ✅ public |
+| `status.phucnn.io.vn` | ✅ | ✅ | ✅ public (read-only) |
+| `home.phucnn.io.vn` | ✅ | ✅ | ✅ public + basicAuth |
 | Dokploy `:3000` | ✅ | ✅ | ❌ |
 | Postgres | internal | ❌ | ❌ |
-| Gatus container | internal | ❌ | qua status hostname |
+
+## 7. Ghi chú vận hành
+
+- User `phuc` **không** có passwordless sudo → thao tác root qua `docker run --privileged --pid=host -v /:/host alpine chroot /host ...` (docker group = root-equivalent).
+- `docker --env-file` do CLI đọc với quyền user → file env phải `root:docker 640`, thư mục `750`.

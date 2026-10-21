@@ -1,0 +1,27 @@
+- Infra:
+    - Dokploy:
+        icon: si:docker
+        href: http://192.168.1.140:3000
+        description: Admin - LAN / Tailscale only
+    - Status page:
+        icon: si:cloudflare
+        href: https://status.phucnn.io.vn
+        description: Gatus - 4 endpoints
+    - Cloudflare:
+        icon: si:cloudflare
+        href: https://dash.cloudflare.com
+        description: DNS, tunnel, SSL
+    - Tailscale:
+        icon: si:tailscale
+        href: https://login.tailscale.com/admin/machines
+        description: homelab-01 - 100.83.245.0
+
+- Apps:
+    - hello:
+        icon: si:github
+        href: https://hello.phucnn.io.vn
+        description: CI/CD demo - GHCR -> Dokploy
+    - GitHub repo:
+        icon: si:github
+        href: https://github.com/bechovang/homeserver-bechovang
+        description: Source + docs

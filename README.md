@@ -17,7 +17,8 @@ Biến PC cũ (i5-3470) thành **home server CI/CD**: deploy dự án cá nhân,
 | **Phần cứng** | i5-3470 · 8GB DDR3 (~6GB usable) · SSD 119GB · HDD 500GB |
 | **Domain** | `phucnn.io.vn` — NS Cloudflare (`bill`/`zainab`), Cloudflare Tunnel live, SSL **Full** |
 | **App demo** | `https://hello.phucnn.io.vn` — CI/CD từ repo `bechovang/homeserver-bechovang` |
-| **Status page** | `https://status.phucnn.io.vn` — Gatus, 4 endpoint × 60s |
+| **Status page** | `https://status.phucnn.io.vn` — Gatus, 4 endpoint × 60s, alert Slack |
+| **Dashboard** | `https://home.phucnn.io.vn` — Homepage, basic auth |
 | **Backup** | `/data/backups` — timer 02:30 daily, restore drill CN 03:30 |
 
 ## 🗂 Cấu trúc repo
@@ -40,6 +41,7 @@ scripts/
   systemd/                      # homelab-backup{,-verify}.{service,timer}
 infra/
   gatus/config.yaml             # status page config-as-code
+  homepage/                     # dashboard config + Traefik basicAuth template
 deploy-CICD/
   Xây dựng Homelab CI CD.txt   # Tài liệu gốc (thảo luận ChatGPT làm nền)
 ```
@@ -54,7 +56,7 @@ deploy-CICD/
 | 3 | Dokploy v0.30.8 — admin `phuchcm2006@gmail.com` + 2FA | ✅ Xong |
 | 4 | Domain `phucnn.io.vn` + Cloudflare Tunnel — **Active**, `cloudflared` 4 conn, `*` → `dokploy-traefik:80` | ✅ Xong |
 | 5 | App `hello` + CI/CD — push → test → GHCR → Dokploy tự deploy; CI đỏ chặn deploy; rollback `sha-…` OK | ✅ Xong |
-| 6 | Backup 02:30 + restore drill ✅ · Gatus `status.phucnn.io.vn` ✅ · reboot test ✅ · còn alert webhook + off-site + 48h | 🔄 |
+| 6 | Backup 02:30 + restore drill ✅ · Gatus + Slack alert ✅ · Homepage basic-auth ✅ · reboot test ✅ · còn Slack URL + 48h (off-site: không làm) | 🔄 |
 
 ## 🎯 Kiến trúc đích
 
