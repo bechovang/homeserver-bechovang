@@ -2,7 +2,7 @@
 
 Biến PC cũ (i5-3470) thành **home server CI/CD**: deploy dự án cá nhân, self-hosted services, học DevOps.
 
-> Cập nhật: 2026-10-21 · Phase 4 ✅ (`phucnn.io.vn` Active, tunnel 4 conn) · Phase 3 chờ tạo admin (DB **0 user**) · SSH key-only
+> Cập nhật: 2026-10-21 · Phase 4 ✅ (`phucnn.io.vn` Active, tunnel 4 conn) · Phase 3 ✅ (admin + 2FA) · Phase 5: CI build xanh, chờ credential deploy
 
 ## 📌 Thông tin nhanh
 
@@ -25,8 +25,12 @@ docs/
   02-ke-hoach-trien-khai.md    # Kế hoạch 7 phase + kiến trúc + checklist nghiệm thu
   03-nhat-ky-cai-dat.md        # Nhật ký: đã cài gì, config nào đã áp dụng
   04-phase4-domain-cloudflare-tunnel.md  # Runbook domain + Cloudflare Tunnel (baseline đã audit)
+  05-phase5-app-cicd.md        # Runbook app mẫu + GitHub Actions → GHCR → Dokploy
 configs/
   netplan-00-installer-config.example.yaml   # Đã sanitize password
+apps/
+  hello/                        # App mẫu zero-dependency (Node 24, Dockerfile non-root có healthcheck)
+.github/workflows/ci.yml        # test → build GHCR → deploy qua Tailscale
 deploy-CICD/
   Xây dựng Homelab CI CD.txt   # Tài liệu gốc (thảo luận ChatGPT làm nền)
 ```
@@ -38,9 +42,9 @@ deploy-CICD/
 | 0 | Base config: static IP, ufw, fail2ban, smartd, timezone, `/data` | ✅ Xong |
 | 1 | Docker Engine 29.9.2 + log rotation | ✅ Xong |
 | 2 | Tailscale (`homelab-01` = 100.83.245.0) | ✅ Xong |
-| 3 | Dokploy v0.30.8 — healthy, nhưng DB **0 user** (chưa tạo admin + 2FA) | 🔄 |
+| 3 | Dokploy v0.30.8 — admin `phuchcm2006@gmail.com` + 2FA | ✅ Xong |
 | 4 | Domain `phucnn.io.vn` + Cloudflare Tunnel — **Active**, `cloudflared` 4 conn, `*` → `dokploy-traefik:80` | ✅ Xong |
-| 5 | App đầu tiên + CI/CD (GHCR → Dokploy) | ⏳ |
+| 5 | App `hello` + CI/CD — test/build GHCR xanh; chờ API key Dokploy + Tailscale OAuth để bật deploy | 🔄 |
 | 6 | Uptime Kuma + backup tự động + nghiệm thu | ⏳ |
 
 ## 🎯 Kiến trúc đích
