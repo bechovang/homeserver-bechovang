@@ -52,7 +52,11 @@ Chu kỳ 60s. **Alerting:** Slack, `failure-threshold: 3`, `success-threshold: 2
 - target trả 500, interval 10s → sau 3 lần gửi payload Slack `color #DD0000` "has been triggered due to having failed 3 time(s)"
 - target trả 200 → sau 2 lần gửi `color #36A64F` "has been resolved after passing successfully 2 time(s)"
 
-Bật alert thật: điền `SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...` vào `/data/gatus/.env` (root:docker 640). **Phải tạo lại container** (`docker restart` không nạp lại `--env-file`):
+**Đang bật thật:** webhook Slack của workspace đã điền vào `/data/gatus/.env` (root:docker 640), channel **#homeserver-noti**. Đã xác nhận:
+- `POST` trực tiếp từ `dokploy-network` → **200**
+- Gatus với endpoint chết `http://127.0.0.1:9/` (interval 10s) → log `Sending slack alert ... TRIGGERED`, tin DOWN tới channel; endpoint test đã xoá sau kiểm tra
+
+Thay đổi webhook: sửa `.env`, **phải tạo lại container** (`docker restart` không nạp lại `--env-file`):
 
 ```bash
 docker rm -f gatus && docker run -d --name gatus --restart=always \
@@ -60,7 +64,7 @@ docker rm -f gatus && docker run -d --name gatus --restart=always \
   -v /data/gatus/config:/config ghcr.io/twin/gatus:stable
 ```
 
-Lưu ý: **App Credentials** (client id/secret, signing secret) không dùng được để gửi alert; cần **Incoming Webhook URL**. URL rỗng thì Gatus vẫn chạy, chỉ không gửi được khi có sự cố.
+Lưu ý: **App Credentials** (client id/secret, signing secret) không dùng được để gửi alert; chỉ **Incoming Webhook URL** mới dùng được.
 
 ## 3. Homepage dashboard (Basic Auth)
 

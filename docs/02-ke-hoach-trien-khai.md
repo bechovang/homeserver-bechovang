@@ -118,7 +118,7 @@ Giới hạn: mỗi service **1 replica**; không build trên server; tạm dừ
 
 ### 🔄 Phase 6 — Monitoring + Backup + Dashboard + nghiệm thu (22/10)
 - **Backup** ✅ `homelab-backup.timer` 02:30 (pg_dump -Fc + configs tar, retention 7/28/14 ngày), drill Chủ nhật 03:30 → restore thật 67 bảng
-- **Monitoring** ✅ **Gatus** thay Uptime Kuma (config-as-code) — `https://status.phucnn.io.vn`, 4 endpoint × 60s; alert Slack (chờ webhook URL)
+- **Monitoring** ✅ **Gatus** thay Uptime Kuma (config-as-code) — `https://status.phucnn.io.vn`, 4 endpoint × 60s; alert **Slack #homeserver-noti** (đã test DOWN)
 - **Homepage** ✅ `https://home.phucnn.io.vn` + Traefik **basicAuth** (bcrypt cost 12), config trong `infra/homepage/`
 - **Reboot test** ✅ static IP, Docker, Dokploy, cloudflared, hello, gatus, homepage, timers tự lên sau ~40s
 - Off-site backup: **user chọn không làm** (rủi ro đã ghi nhận). Còn: Slack URL + 48h RAM/disk

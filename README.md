@@ -56,7 +56,7 @@ deploy-CICD/
 | 3 | Dokploy v0.30.8 — admin `phuchcm2006@gmail.com` + 2FA | ✅ Xong |
 | 4 | Domain `phucnn.io.vn` + Cloudflare Tunnel — **Active**, `cloudflared` 4 conn, `*` → `dokploy-traefik:80` | ✅ Xong |
 | 5 | App `hello` + CI/CD — push → test → GHCR → Dokploy tự deploy; CI đỏ chặn deploy; rollback `sha-…` OK | ✅ Xong |
-| 6 | Backup 02:30 + restore drill ✅ · Gatus + Slack alert ✅ · Homepage basic-auth ✅ · reboot test ✅ · còn Slack URL + 48h (off-site: không làm) | 🔄 |
+| 6 | Backup 02:30 + restore drill ✅ · Gatus + Slack `#homeserver-noti` ✅ · Homepage basic-auth ✅ · reboot ✅ · còn 48h (off-site: không làm) | 🔄 |
 
 ## 🎯 Kiến trúc đích
 
