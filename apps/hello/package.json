@@ -1,0 +1,15 @@
+{
+  "name": "homeserver-hello",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimal zero-dependency app proving the homelab CI/CD pipeline",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  }
+}

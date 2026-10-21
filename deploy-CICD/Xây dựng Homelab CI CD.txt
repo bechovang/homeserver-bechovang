@@ -1,0 +1,1355 @@
+﻿**You:**
+
+[English (auto-generated)] The Kubernetes Homelab That Prints Job Offers - 2025 [DownSub.com].txt
+Tài liệu
+[English (auto-generated)] My entire life runs on these 5 self-hosted apps. [DownSub.com].txt
+Tài liệu
+[English (auto-generated)] What's on my Home Server 2025 – NixOS Edition [DownSub.com].txt
+Tài liệu
+[English (auto-generated)] This kubernetes homelab setup is my favorite one yet. [DownSub.com].txt
+Tài liệu
+[English (auto-generated)] Dokploy is my absolute favorite way to deploy to a VPS in 2025 [DownSub.com].txt
+Tài liệu
+[English (auto-generated)] This homelab setup is my favorite one yet. [DownSub.com].txt
+Tài liệu
+đọc hiểu đi, tôi đang dư 1 pc cũ tôi muốn biến nó thành 1 homesever để cicd , deploy dự án cá nhân và làm vài cái dịch vụ hay ho gì đó
+
+* * *
+
+**ChatGPT:**
+
+Mình đã đọc cả 6 file transcript bạn gửi. Mình hiểu mục tiêu của bạn là tận dụng một chiếc PC cũ để xây dựng một Home Server / Homelab cá nhân, chứ không đơn thuần là biến nó thành ổ lưu trữ NAS.
+
+Cụ thể, bạn muốn chiếc PC đó trở thành:
+
+- Máy chủ deploy: Host website, API, database, backend, frontend và các dự án cá nhân, có domain riêng và HTTPS.
+- Hệ thống CI/CD: Push code lên GitHub → tự động test, build, deploy, có thể tạo môi trường preview cho Pull Request.
+- Self-hosted platform: Tự chạy những thứ như Git server, n8n, monitoring, dashboard và các dịch vụ hữu ích khác.
+- DevOps playground: Có chỗ để học Docker, Linux, networking, Kubernetes, GitOps, monitoring và Infrastructure as Code.
+
+Điều mình thấy thú vị từ 6 video là có hai hướng xây homelab khá khác nhau.
+
+Hướng thứ nhất là xây một PaaS cá nhân, giống Vercel, Railway hoặc Render nhưng chạy trên PC của bạn. Video về Dokploy tập trung đúng vào mục tiêu này: kết nối GitHub, tự động deploy, quản lý PostgreSQL, HTTPS và preview deployment cho từng PR. 
+[English (auto-generated)] Dokploy is my absolute favorite way to deploy to a VPS in 2025 [DownSub.com].txt
+
+Hướng thứ hai là xây một môi trường DevOps thực thụ, dùng Kubernetes, FluxCD, Forgejo, PostgreSQL operator, Grafana và những thành phần hạ tầng khác. Các video Kubernetes coi homelab vừa là nơi chạy ứng dụng thật, vừa là một portfolio kỹ thuật. 
+[English (auto-generated)] This kubernetes homelab setup is my favorite one yet. [DownSub.com].txt
+
+Với một chiếc PC cũ duy nhất, mình nghĩ bạn nên kết hợp cả hai, nhưng theo từng giai đoạn: trước tiên có hệ thống deploy hoạt động ổn định, sau đó mở rộng sang Kubernetes và GitOps để học chuyên sâu.
+
+1. Kiến trúc mình đề xuất cho PC của bạn
+
+PC lập trình của bạn
+
+VS Code / Neovim → Git Push
+
+GitHub + GitHub Actions
+
+Test → Build → Docker Image → GHCR
+
+Trigger deployment sau khi CI thành công
+
+PC cũ — Home Server
+
+Ubuntu Server + Docker + Dokploy
+
+Quản lý deployments, containers, domains
+
+Next.js / React
+
+Backend APIs
+
+PostgreSQL / Redis
+
+Self-hosted Apps
+
+Cloudflare Tunnel
+
+Website public qua HTTPS
+
+Tailscale
+
+SSH và admin riêng tư
+
+Đây là kiến trúc mục tiêu, không nhất thiết phải cài tất cả ngay từ ngày đầu.
+
+Mình đặc biệt thích dùng Dokploy cho nhu cầu của bạn vì hỗ trợ auto-deploy qua GitHub và preview deployment cho PR. 
+Dokploy
++1
+ Đồng thời, Cloudflare Tunnel giúp public web app ngay cả khi mạng nhà không có public IP, và không cần mở inbound port trên router. 
+Cloudflare Docs
+
+2. Nên cài hệ điều hành nào?
+
+Hệ điều hành  Đánh giá cho trường hợp của bạn
+Ubuntu Server LTS  Mình ưu tiên để bắt đầu. Dễ triển khai Docker, Dokploy và CI/CD.
+Proxmox VE  Phù hợp nếu RAM tương đối dư và muốn chia nhiều VM để thử các kiến trúc khác nhau.
+NixOS  Rất hấp dẫn nếu thích cấu hình declarative, Git-managed và reproducible. Nhưng mất thêm thời gian học.
+Talos Linux  Dành cho giai đoạn bạn thực sự muốn vận hành Kubernetes.
+
+Nếu PC có RAM 16–32 GB trở lên, mình sẽ cân nhắc Proxmox → Ubuntu VM → Docker/Dokploy, để sau này tạo thêm VM học K3s mà không phải cài lại máy.
+
+Nếu chỉ có RAM 8 GB thì Ubuntu Server cài trực tiếp sẽ hợp lý hơn.
+
+3. Những dịch vụ đáng self-host nhất
+
+Mình chọn từ các ứng dụng thực sự được nhắc trong 6 video, ưu tiên thứ có ích cho developer.
+
+Dịch vụ  Bạn dùng để làm gì?  Ưu tiên
+Dokploy  Deploy dự án như một PaaS cá nhân  Rất cao
+Uptime Kuma  Theo dõi website/API và cảnh báo downtime  Rất cao
+Homepage  Một trang dashboard tập trung toàn bộ homelab  Cao
+n8n  Workflow automation, webhook, API, AI automation  Cao
+Forgejo  Git server và CI/CD self-hosted thay thế GitHub  Cao
+Linkding  Lưu và tìm kiếm bookmark trên mọi thiết bị  Trung bình
+Miniflux  RSS reader, có thể kết hợp AI tóm tắt bài viết  Trung bình
+Paperless-ngx  Quản lý PDF, tài liệu với OCR và tìm kiếm  Trung bình
+Immich  Google Photos cá nhân, backup hình điện thoại  Tùy nhu cầu
+Jellyfin  Media server xem phim, video cá nhân  Tùy nhu cầu
+
+Có một ý tưởng trong video My entire life runs on these 5 self-hosted apps mà mình nghĩ rất đáng thử: kết hợp Forgejo + n8n + ứng dụng tự viết + dữ liệu PostgreSQL để xây một hệ thống automation hoàn chỉnh.
+
+Ví dụ: tự thu thập RSS, dùng AI phân loại thông tin, lưu database, tạo dashboard và gửi thông báo đến Telegram.
+
+4. Lộ trình xây dựng
+
+Giai đoạn 1 — Personal deployment platform
+
+Cài Ubuntu Server, Docker, Dokploy, Tailscale và Cloudflare Tunnel. Triển khai một ứng dụng Next.js có PostgreSQL, domain HTTPS và auto-deploy từ GitHub.
+
+Mục tiêu: bạn push code, CI chạy thành công và phiên bản mới tự được triển khai.
+
+Giai đoạn 2 — Self-hosted ecosystem
+
+Cài Uptime Kuma, Homepage, n8n, Forgejo và một vài ứng dụng bạn thích. Thiết lập backup database ra thiết bị khác hoặc cloud, kiểm tra khả năng restore và cấu hình cảnh báo khi có lỗi.
+
+Giai đoạn 3 — Kubernetes & GitOps
+
+Tạo một môi trường K3s riêng, học Helm, FluxCD, Prometheus/Grafana, CloudNativePG và quản lý cấu hình bằng Git. Một máy vẫn có thể chạy single-node K3s, nhưng không có HA thực sự. 
+K3s
++1
+
+5. Một số điều quan trọng trước khi bắt đầu
+
+CI/CD: Với PC cũ, mình ưu tiên để GitHub-hosted runner thực hiện test/build, rồi publish Docker image lên GHCR. Máy ở nhà chủ yếu nhận deployment. Nếu muốn tự host runner thì nên cách ly trong VM riêng, đặc biệt không cho PR từ người lạ chạy tùy ý trên máy chứa dữ liệu. 
+GitHub Docs
++1
+
+An toàn dữ liệu: Có backup ra ngoài PC, không public Dokploy admin, SSH, PostgreSQL và dashboard quản trị trực tiếp. Preview deployments cũng cần giới hạn quyền truy cập và tài nguyên. Và nhớ rằng điện, mạng hoặc PC mất kết nối thì website cũng offline.
+
+Kubernetes: Đừng vội dựng một cluster nhiều node ảo trên cùng PC rồi xem đó là HA. Nó giúp học nhưng không tránh được điểm lỗi chung là chiếc PC vật lý.
+
+6. Giờ mình cần biết cấu hình PC cũ của bạn
+CPU / đời máy
+RAM
+[ ]
+8 GB
+[x]
+16 GB
+[ ]
+32 GB
+[ ]
+Khác / chưa rõ
+Ổ cứng hiện có
+Ưu tiên chính của bạn
+[ ]
+CI/CD và deploy dự án hoạt động ổn định
+[ ]
+Học DevOps, Kubernetes, GitOps chuyên sâu
+[x]
+Cả hai — chạy dịch vụ thật và có môi trường thử nghiệm
+Thiết kế Home Server cho PC của tôi
+
+Mình muốn dựa vào đúng phần cứng bạn đang có để chọn giữa Ubuntu bare metal, Proxmox + VM, hoặc K3s, tránh việc cài quá nhiều thứ rồi PC không đủ tài nguyên chạy các dự án cá nhân.
+
+![](https://www.google.com/s2/favicons?domain=https://docs.dokploy.com&sz=32)
+
+![](https://www.google.com/s2/favicons?domain=https://developers.cloudflare.com&sz=32)
+
+![](https://www.google.com/s2/favicons?domain=https://docs.k3s.io&sz=32)
+
+![](https://www.google.com/s2/favicons?domain=https://docs.github.com&sz=32)
+
+* * *
+
+**You:**
+
+![Tệp đính kèm của người dùng](blob:https://chatgpt.com/2510901f-024a-440d-94e3-a002937ddf01)
+![Tệp đính kèm của người dùng](blob:https://chatgpt.com/07bd0021-e37c-4da5-a8a1-8b5eb9e5285d)
+![Tệp đính kèm của người dùng](blob:https://chatgpt.com/4f7055b5-9264-48ec-8c8b-5209732aa930)
+![Tệp đính kèm của người dùng](blob:https://chatgpt.com/d0cfe4b4-ab40-4995-8466-9dd0e7b7bfb6)
+![Tệp đính kèm của người dùng](blob:https://chatgpt.com/53dffe0a-5542-4d17-b6e1-bacefebab9cd)
+
+cấu hình pc này
+
+* * *
+
+**ChatGPT:**
+
+PC này hoàn toàn có thể biến thành Home Server để chạy CI/CD, deploy dự án cá nhân và self-host nhiều dịch vụ. Cấu hình hơi cũ nhưng vẫn đủ dùng, đặc biệt nếu cài Linux Server thay vì Windows.
+
+Mình đã xem cả 5 ảnh CPU-Z, DxDiag và Task Manager bạn gửi.
+
+1. Cấu hình phần cứng hiện tại
+
+Thành phần  Thông số
+CPU  Intel Core i5-3470 (Ivy Bridge, 2012)
+Nhân / luồng  4 cores / 4 threads
+Xung nhịp  3.2 GHz, Turbo tối đa 3.6 GHz
+RAM  8 GB DDR3, Dual Channel
+Tốc độ RAM  DDR3-1600 (800 MHz thực)
+Mainboard  MSI MS-7717, chipset Intel H61
+SSD  KimMiDi TB900 128 GB
+HDD  Có một ổ HDD, chưa rõ dung lượng
+GPU  AMD Radeon HD, chưa rõ model
+Hệ điều hành  Windows 10 Pro 64-bit
+CPU TDP  77 W (không phải công suất tiêu thụ khi idle)
+
+Đánh giá cho nhu cầu Home Server của bạn
+
+8/10
+
+Deploy web/API nhỏ
+
+7/10
+
+Docker, CI/CD cơ bản
+
+4/10
+
+Kubernetes nhiều dịch vụ
+
+Điểm đánh giá tương đối theo phần cứng hiện có, không phải kết quả benchmark.
+
+2. PC này chạy được những gì?
+
+Dịch vụ  Khả năng chạy
+Docker / Docker Compose  Tốt
+Dokploy  Chạy được
+GitHub Actions CI/CD  Tốt khi build trên GitHub
+Next.js, React, Node.js API  Tốt với dự án nhỏ
+PostgreSQL / Redis  Tốt với tải nhẹ
+n8n / Uptime Kuma / Homepage  Tốt
+Forgejo  Chạy được
+Proxmox + vài VM  RAM khá hạn chế
+Single-node K3s  Đủ học và thử nghiệm
+Kubernetes nhiều node ảo  Không nên với 8 GB RAM
+Local LLM / AI inference  Không phù hợp với model lớn
+
+Điểm nghẽn lớn nhất là RAM 8 GB và SSD 128 GB, chứ CPU chưa đến mức phải bỏ.
+
+3. Kiến trúc mình chọn cho máy này
+
+Ở cấu hình hiện tại, mình sẽ không cài Proxmox hay Talos ngay. Thay vào đó:
+
+Ubuntu Server LTS — Bare Metal
+
+i5-3470 · 8 GB RAM · SSD 128 GB
+
+Docker Engine + Dokploy
+
+Deploy và quản lý containers
+
+Next.js / API
+
+PostgreSQL
+
+n8n
+
+Uptime Kuma
+
+Homepage
+
+Redis
+
+Cloudflare Tunnel
+
+Public website, HTTPS
+
+Tailscale
+
+SSH, quản trị từ xa
+
+Một workflow thực tế:
+
+Git Push → GitHub Actions test/build → GHCR → Dokploy deploy → Website cập nhật
+
+Nhờ sử dụng GitHub-hosted runner để build, PC cũ không phải chịu tải biên dịch lớn mỗi lần bạn push code.
+
+4. Có nên nâng cấp máy không?
+
+Theo mình, chưa cần thay CPU hoặc mainboard.
+
+Nâng cấp  Độ ưu tiên  Lý do
+RAM 8 → 16 GB DDR3  Rất cao  Chạy nhiều container, database và ứng dụng thoải mái hơn
+SSD 128 → 500 GB  Rất cao  Có chỗ cho Docker images, volumes, database, logs
+HDD hiện tại  Giữ lại  Dùng lưu dữ liệu, backup cục bộ nếu ổ còn tốt
+CPU i5-3470  Chưa cần  Vẫn đủ chạy nhiều web service nhỏ
+GPU AMD  Không cần thiết  Có thể tháo nếu CPU/mainboard cho phép xuất hình qua iGPU
+UPS  Nên cân nhắc  Tránh tắt máy đột ngột gây hỏng dữ liệu
+
+Nếu mainboard hỗ trợ, nâng RAM lên 16 GB và thay SSD 500 GB sẽ cải thiện trải nghiệm đáng kể.
+
+Một lưu ý nữa: CPU đời 2012 có thể không tiết kiệm điện bằng mini PC hiện đại. Nếu dự định chạy 24/7, bạn nên đo điện năng thực tế tại ổ cắm để đánh giá chi phí vận hành.
+
+5. Kế hoạch triển khai mình khuyên dùng
+
+1. Đầu tiên: Cài Ubuntu Server, cấu hình SSH key, IP nội bộ cố định, Docker và Tailscale.
+2. Tiếp theo: Cài Dokploy, kết nối GitHub, deploy thử một dự án Next.js + PostgreSQL.
+3. Sau đó: Thiết lập Cloudflare Tunnel, domain, HTTPS, Uptime Kuma, backup.
+4. Cuối cùng: Thêm n8n, Forgejo và các ứng dụng self-hosted. Nếu muốn học Kubernetes thì xây môi trường K3s riêng sau khi nâng RAM.
+
+Điều quan trọng là giữ cho server chạy ổn định và có backup trước khi biến nó thành nơi thử nghiệm những thứ có thể làm hỏng hệ thống.
+
+Mình cần biết thêm một thông tin quan trọng: Ổ HDD của bạn có dung lượng bao nhiêu (500 GB, 1 TB hay 2 TB)?
+
+Vì nếu HDD đủ lớn, mình có thể thiết kế riêng phần lưu trữ, Docker volumes, database, backup và media cho máy này mà chưa cần mua thêm ổ cứng.
+
+* * *
+
+**You:**
+
+![Tệp đính kèm của người dùng](blob:https://chatgpt.com/f4eb3c9d-a39b-4140-b429-b1092ed40784)
+
+à với bạn check driver của cái usb wifi này nữa, có lần tôi cài linux nó ko nhận usb này thành ra ko có wifi
+
+* * *
+
+**ChatGPT:**
+
+Nhìn ảnh thì mình xác định được USB Wi-Fi bạn đang dùng là:
+
+![Adaptador Wireless TP-Link TL-WN821N USB 300M | KaBuM!](https://images.openai.com/static-rsc-4/ev1jQ1-bgZc7P6hsKHi640yDPZ0FmRip2oHraFetQl5LdDw8yMQOL8jNA9jUSckB2mkWBOUJZEp15TTFxiOGKTsHLkixCqdJIkCFjcZpQIMrq6KRWkqaXW91btsufu46o3kXjqzp0ttvKkN_gxw2l_VgMUJfNe-UmGEAdUxh3uI?purpose=inline)
+
+TP-Link TL-WN821N V6.0
+
+Wireless N USB Adapter
+
+- Chuẩn Wi-Fi: 802.11n, 2.4 GHz
+- Tốc độ lý thuyết: 300 Mbps
+- Phiên bản phần cứng: V6.0
+
+Vấn đề Linux không nhận USB Wi-Fi này rất có thể liên quan đến driver chipset Realtek, không phải do chiếc PC i5-3470 của bạn quá cũ.
+
+Điều quan trọng nhất là V6.0, vì các phiên bản phần cứng khác nhau của TL-WN821N có thể sử dụng chipset khác nhau, nên driver cũng khác nhau.
+
+Mình sẽ kiểm tra đúng phiên bản V6, driver Linux phù hợp và cách xử lý khi Ubuntu Server không nhận thiết bị.
+
+1. Kết quả kiểm tra driver Linux
+
+Mình đã tìm được xác nhận từ chính diễn đàn hỗ trợ TP-Link.
+
+Mục  Kết quả
+Chipset  Realtek RTL8192EU
+Driver Linux tích hợp  rtl8xxxu
+Driver thay thế  8192eu (bản DKMS cộng đồng)
+USB ID thường gặp  2357:0107 — cần xác nhận bằng lsusb
+Driver Linux chính thức của TP-Link  Chỉ hỗ trợ kernel cũ, dưới 4.9.60
+
+TP-Link xác nhận TL-WN821N V6 sử dụng RTL8192EU và không cung cấp driver chính thức cho các kernel mới hơn phạm vi trên. 
+Home Network Community
++1
+
+Tin tốt: Linux hiện đại có driver rtl8xxxu tích hợp trong kernel, hỗ trợ RTL8192EU. Vì thế, Ubuntu Server 24.04 LTS có khả năng nhận USB này mà không cần cài driver ngoài. Tuy nhiên, driver có thể hoạt động không ổn định hoặc cần firmware, nên không thể đảm bảo chắc chắn khi chưa kiểm tra thực tế. 
+GitHub
++1
+
+Mình khuyên bạn thử driver có sẵn trước, chỉ cài driver bên ngoài nếu nó không hoạt động. Cách này giảm nguy cơ lỗi khi nâng cấp kernel sau này.
+
+2. Cách kiểm tra USB Wi-Fi trước khi cài Home Server
+
+Mình khuyên bạn kiểm tra bằng Ubuntu Live USB trước khi xóa Windows hoặc cài Ubuntu Server chính thức.
+
+Sau khi boot vào Linux, mở Terminal và chạy:
+
+Bước 1 — Linux có thấy USB không?
+
+Copy
+Bash
+lsusb
+Nếu xuất hiện dòng tương tự:
+ID 2357:0107 TP-Link TL-WN821N
+nghĩa là Linux đã nhận diện thiết bị USB ở mức phần cứng, nhưng chưa chắc Wi-Fi hoạt động.
+
+Bước 2 — Kiểm tra driver và interface
+
+Copy
+Bash
+lsmod | grep rtl8xxxu
+ip -br link
+rfkill list
+
+Nếu thấy interface như wlan0 hoặc wlx..., driver có thể đã hoạt động.
+
+Bước 3 — Thử nạp driver Linux tích hợp
+
+Copy
+Bash
+sudo modprobe rtl8xxxu
+ip -br link
+sudo journalctl -k -b | grep -Ei 'rtl8xxxu|8192eu|firmware'
+
+Kiểm tra có báo lỗi thiếu firmware hoặc lỗi khởi tạo adapter không. Nếu thiếu firmware, hãy kiểm tra và cài gói linux-firmware bằng kết nối mạng tạm thời.
+
+3. Nếu driver tích hợp không hoạt động
+
+Có một repository GitHub chứa driver RTL8192EU do cộng đồng vá để hỗ trợ các kernel Linux mới hơn:
+
+Mange/rtl8192eu-linux-driver
+
+Driver cộng đồng hỗ trợ TL-WN821N V6
+
+Repository này có hướng dẫn DKMS, nhưng tác giả cũng nói rõ đây là bản lưu trữ không được đảm bảo hỗ trợ. Vì vậy, chưa thể chắc chắn nó biên dịch thành công trên kernel Ubuntu bạn sẽ cài. 
+GitHub
++1
+
+Khi đã có mạng tạm qua Ethernet hoặc USB tethering từ điện thoại, bạn có thể thử:
+
+Bash
+sudo apt update
+sudo apt install -y git dkms build-essential \
+  linux-headers-$(uname -r)
+
+git clone https://github.com/Mange/rtl8192eu-linux-driver.git
+cd rtl8192eu-linux-driver
+
+sudo dkms add .
+sudo dkms install rtl8192eu/1.0
+
+Nếu cài đặt thành công, mới tiếp tục chuyển sang driver 8192eu:
+
+Bash
+echo "blacklist rtl8xxxu" | \
+  sudo tee /etc/modprobe.d/rtl8xxxu.conf
+
+sudo update-initramfs -u
+sudo reboot
+
+Sau khi khởi động lại:
+
+Bash
+lsmod | grep 8192eu
+ip -br link
+
+Lưu ý: nếu DKMS báo lỗi, không blacklist rtl8xxxu. Driver ngoài còn có thể phải biên dịch lại khi nâng cấp kernel; DKMS giúp tự động hóa nhưng không bảo đảm tương thích.
+
+4. Đối với Home Server, mình vẫn ưu tiên dây LAN
+![Personal computer motherboard and cable connection](https://images.openai.com/static-rsc-4/jZv0RK1xQxghWoWChoQLza9ZhxptAZTNscO0AyOIftdyh7-e1D_Op_AAHbt4pJwkGBRBdp8tnZQn4x1foPEtQvelaPtEWxyzL9iRgxeTYeYXU38gRUICWaenzzpt2TLxF1U_UdGbGIE15Lp5it_gNBbpzv2Ee9yu9GiO9VCWXbAaUeuZNDj9SCoe5iQ9OLUX?purpose=inline)
+
+Ethernet (khuyên dùng)
+
+Ổn định hơn, không phụ thuộc driver USB Wi-Fi, phù hợp server 24/7.
+
+![TP-LINK TL-WN821N Adaptador USB Wireless N 300M | PcComponentes.pt](https://images.openai.com/static-rsc-4/mPLSuVzgKaUdw7X_H66bWLRnHkxaOCbndvPUxem_6vG1DlqY4-ePwmj2E4v12bGw-ZJIJJA39Nt1PzL-2DNn73rw3NSstGdEtNXAiLxgag49NBi2uMffwZapMCniElqRCi5rEyfK8RMcgLxykj3AeejP76Rj8KOL3oJT22hPuhs?purpose=inline)
+
+USB Wi-Fi hiện tại
+
+Dùng được nếu driver ổn định và sóng đủ mạnh, nhưng chỉ hỗ trợ 2.4 GHz.
+
+Để chạy CI/CD, Dokploy, PostgreSQL, n8n và Cloudflare Tunnel liên tục, Ethernet sẽ giúp bạn tránh các tình huống như mất Wi-Fi sau khi reboot hoặc kernel update.
+
+Nếu buộc phải dùng Wi-Fi, nên cấu hình router với mạng 2.4 GHz có WPA2-Personal tương thích, thay vì mạng chỉ cho phép WPA3.
+
+5. Mình cần xác nhận một điều
+
+PC cũ này bạn có thể cắm dây LAN trực tiếp từ router/modem vào không, hay bắt buộc phải kết nối bằng USB Wi-Fi TL-WN821N V6?
+
+Điều này ảnh hưởng trực tiếp đến cách mình thiết kế mạng và quá trình cài Ubuntu Server cho bạn. Nếu bắt buộc dùng Wi-Fi, mình sẽ ưu tiên giải quyết driver và khả năng tự kết nối lại sau reboot trước khi triển khai Docker/Dokploy.
+
+![](https://www.google.com/s2/favicons?domain=https://community.tp-link.com&sz=32)
+
+![](https://www.google.com/s2/favicons?domain=https://github.com&sz=32)
+
+* * *
+
+**You:**
+
+Mình cần biết thêm một thông tin quan trọng: Ổ HDD của bạn có dung lượng bao nhiêu (500 GB, 1 TB hay 2 TB)?
+Vì nếu HDD đủ lớn, mình có thể thiết kế riêng phần lưu trữ, Docker volumes, database, backup và media cho máy này mà chưa cần mua thêm ổ cứng.
+
+
+như nó 252gba áy
+
+* * *
+
+**ChatGPT:**
+
+Vậy là PC cũ của bạn có 2 ổ cứng với tổng dung lượng khoảng 380 GB. Với nhu cầu làm Home Server để CI/CD, deploy dự án cá nhân và chạy các dịch vụ self-hosted thì đủ để bắt đầu, chưa cần mua thêm ổ cứng.
+
+Cấu hình Home Server hiện tại
+
+Thành phần  Thông số
+CPU  Intel Core i5-3470, 4 nhân / 4 luồng
+RAM  8 GB DDR3-1600
+SSD  128 GB
+HDD  Khoảng 252 GB
+Tổng dung lượng  Khoảng 380 GB
+Mạng  USB Wi-Fi TP-Link TL-WN821N V6
+
+Mình sẽ phân chia ổ cứng như sau
+
+SSD — 128 GB
+
+Ứng dụng & Database
+
+~30 GB OS
+
+~58 GB Docker & DB
+
+~40 GB dự phòng
+
+Cài Ubuntu Server, Docker, Dokploy, PostgreSQL, Redis và ứng dụng cá nhân. Các con số trên là ngân sách dung lượng dự kiến, không phải phân vùng bắt buộc.
+
+HDD — 252 GB
+
+Storage & Backup
+
+~80 GB Backup
+
+~120 GB Files
+
+~52 GB dự phòng
+
+Lưu PostgreSQL dumps, file upload, tài liệu, dữ liệu n8n và các bản lưu định kỳ. Dữ liệu quan trọng vẫn cần một bản sao ngoài chiếc PC này.
+
+Những gì mình muốn triển khai trên PC này
+
+Giai đoạn đầu:
+
+- Ubuntu Server LTS + Docker
+- Dokploy để deploy Next.js, Node.js, Python API
+- GitHub Actions + GHCR cho CI/CD
+- PostgreSQL + Redis
+- Cloudflare Tunnel + Tailscale
+- Uptime Kuma để theo dõi uptime
+
+Giai đoạn sau: Thêm n8n, Homepage, Forgejo, Miniflux hoặc các dịch vụ bạn thích. Cài từng ứng dụng và theo dõi RAM, không chạy tất cả ngay cùng lúc.
+
+Đặc biệt, với 8 GB RAM, mình sẽ không cho máy tự build đồng thời nhiều dự án lớn. Phần build để GitHub Actions xử lý, PC ở nhà chỉ chạy ứng dụng và database.
+
+Có cần nâng cấp không?
+
+Chưa cần. Bạn nên dùng cấu hình hiện tại để dựng server và đo mức sử dụng thực tế. Nếu sau này thiếu tài nguyên, thứ tự ưu tiên của mình là nâng RAM lên 16 GB, rồi mới cân nhắc SSD lớn hơn.
+
+Vì HDD khá cũ, trước khi chuyển dữ liệu sang mình cũng muốn kiểm tra SMART để biết ổ còn khỏe hay không.
+
+Giờ còn một vấn đề quyết định cách cài đặt: PC này đặt gần router để cắm dây LAN được không, hay bạn bắt buộc dùng USB Wi-Fi TP-Link?
+
+Mình muốn xử lý phần kết nối mạng thật ổn trước, vì một Home Server chạy 24/7 cần tự kết nối lại sau khi khởi động hoặc mất điện.
+
+* * *
+
+**You:**
+
+ok giwof cho tôi plan chi tiết đi, ko cần redis
+
+* * *
+
+**ChatGPT:**
+
+Kế hoạch xây dựng Home Server cá nhân — CI/CD, Deploy & Self-hosting
+
+Mình sẽ thiết kế theo hướng biến PC cũ thành một mini cloud cá nhân, có thể deploy nhiều dự án, tự động CI/CD, quản lý database, truy cập từ Internet và chạy thêm các dịch vụ hữu ích.
+
+Không dùng Redis. Không cần mua thêm phần cứng ở giai đoạn đầu. Không dựng Kubernetes ngay.
+
+Đây là kế hoạch dựa trên cấu hình bạn đã gửi và các ý tưởng trong 6 video homelab, Kubernetes, NixOS và Dokploy trước đó.
+
+1. Chốt công nghệ sử dụng
+
+Server
+
+HomeLab-01
+
+Máy chủ vật lý, hoạt động 24/7
+
+CPU
+
+Intel i5-3470
+
+4 cores / 4 threads
+
+RAM
+
+8 GB DDR3
+
+Có thể nâng 16 GB
+
+SSD
+
+128 GB
+
+OS, Docker, database
+
+HDD
+
+~252 GB
+
+Files, backup cục bộ
+
+Thành phần  Công nghệ lựa chọn  Vai trò
+OS  Ubuntu Server 24.04 LTS  Hệ điều hành chạy trực tiếp trên PC
+Container  Docker Engine  Cô lập ứng dụng
+Deployment  Dokploy  Quản lý, deploy, rollback ứng dụng
+Source code  GitHub  Lưu repository
+CI  GitHub Actions  Test, build Docker image
+Container Registry  GHCR  Lưu Docker image
+Database  PostgreSQL  Database chính cho các dự án
+Reverse proxy  Traefik (đi kèm Dokploy)  Định tuyến HTTP tới ứng dụng
+Public access  Cloudflare Tunnel  Công khai website không cần mở port router
+Private access  Tailscale  SSH và quản trị từ xa
+Monitoring  Uptime Kuma  Kiểm tra uptime và gửi cảnh báo
+Dashboard  Homepage  Cổng truy cập dịch vụ nội bộ
+Automation  n8n  Workflow automation
+Backup  HDD + lưu trữ bên ngoài  Khôi phục dữ liệu khi xảy ra sự cố
+
+Dokploy xác nhận hỗ trợ Ubuntu Server 24.04 LTS, yêu cầu tối thiểu 2 GB RAM và 30 GB dung lượng đĩa cho bản thân nền tảng. Cấu hình của bạn đáp ứng được, nhưng RAM phải được chia hợp lý cho các ứng dụng. 
+Dokploy
+
+Kiến trúc tổng thể
+
+Máy tính lập trình của bạn
+
+Code → Commit → Push lên GitHub
+
+GitHub Actions
+
+Lint / Test → Build → Push Docker image lên GHCR
+
+Kích hoạt deployment khi CI thành công
+
+Home Server — i5-3470 / 8 GB
+
+Ubuntu Server + Docker + Dokploy
+
+Pull image → Start / Update containers
+
+Frontend / Next.js
+
+Backend / API
+
+PostgreSQL
+
+n8n
+
+Uptime Kuma
+
+Homepage
+
+Cloudflare Tunnel
+
+Người dùng truy cập website public
+
+Tailscale
+
+Bạn truy cập dashboard, SSH và database
+
+Để giảm tải PC, mình chọn build Docker image trên GitHub Actions rồi mới triển khai image về server. Đây là một trong các quy trình Dokploy hỗ trợ thông qua registry và deployment API. 
+Dokploy
++1
+
+2. Lộ trình triển khai: khoảng 10–14 ngày
+
+Không nhất thiết phải làm liên tục. Mỗi giai đoạn sẽ có kết quả kiểm thử trước khi chuyển sang giai đoạn tiếp theo.
+
+Ngày 1
+
+Kiểm tra phần cứng và dữ liệu
+
+Ổ cứng đủ khỏe, USB boot và mạng hoạt động
+
+Ngày 2
+
+Cài Ubuntu Server
+
+Server khởi động độc lập, SSH từ máy khác
+
+Ngày 3
+
+Docker, Tailscale, Dokploy
+
+Truy cập được Dokploy dashboard
+
+Ngày 4
+
+Cloudflare Tunnel & domain
+
+Website demo public có HTTPS
+
+Ngày 5–6
+
+PostgreSQL, ứng dụng mẫu, CI/CD
+
+Push GitHub → tự động deploy
+
+Ngày 7–8
+
+Backup, giám sát, bảo mật
+
+Có cảnh báo và restore dữ liệu thành công
+
+Ngày 9–10
+
+Homepage và n8n
+
+Có dashboard và workflow automation
+
+Ngày 11–14
+
+Tối ưu, tài liệu hóa, kiểm thử
+
+Sẵn sàng đưa dự án cá nhân lên chạy
+
+3. Giai đoạn 1 — Chuẩn bị phần cứng và cài OS
+
+Dự kiến: Ngày 1–2
+
+3.1. Kiểm tra trước khi cài
+[ ]
+Sao lưu toàn bộ dữ liệu Windows cần giữ trên SSD và HDD.
+[ ]
+Kiểm tra tình trạng SMART của hai ổ cứng.
+[ ]
+Test boot Ubuntu Live USB và kiểm tra Wi-Fi TP-Link TL-WN821N V6.
+[ ]
+Kiểm tra PC có thể dùng Ethernet hay bắt buộc phải dùng USB Wi-Fi.
+[ ]
+Vệ sinh quạt, kiểm tra nhiệt độ CPU và nguồn máy.
+[ ]
+Kiểm tra BIOS có tùy chọn tự bật máy sau khi có điện trở lại hay không.
+
+Đặc biệt với USB Wi-Fi: Không xóa Windows trước khi xác nhận được Ubuntu có thể kết nối mạng bằng adapter RTL8192EU này hoặc bằng phương án thay thế. Linux nhận thiết bị qua lsusb không đồng nghĩa với Wi-Fi đã hoạt động.
+
+3.2. Cài Ubuntu Server
+
+Mình chọn Ubuntu Server 24.04 LTS, không cài desktop GUI để tiết kiệm RAM và dùng đúng môi trường server.
+
+Trong quá trình cài:
+
+- Hostname: homelab-01
+- Username: bạn tự đặt, không sử dụng root để đăng nhập hằng ngày.
+- Cài OpenSSH Server.
+- Cài OS lên SSD 128 GB, dùng ext4 và để phần lớn dung lượng cho filesystem gốc /.
+- Không format HDD cho đến khi đã xác nhận không còn dữ liệu cần giữ.
+- Kiểm tra máy boot theo UEFI hay Legacy BIOS để tạo USB cài đặt phù hợp.
+
+Sau khi cài xong, chạy:
+
+Bash
+sudo apt update
+sudo apt full-upgrade -y
+
+sudo apt install -y \
+  curl git vim htop btop \
+  smartmontools \
+  ca-certificates \
+  ufw unattended-upgrades
+
+sudo timedatectl set-timezone Asia/Ho_Chi_Minh
+sudo hostnamectl set-hostname homelab-01
+
+Kiểm tra:
+
+Bash
+uname -a
+free -h
+lsblk -o NAME,SIZE,MODEL,FSTYPE,MOUNTPOINTS
+ip -br addr
+df -h
+
+Tiêu chí hoàn thành: Máy khởi động không cần màn hình, bàn phím; tự kết nối mạng sau reboot; có thể SSH từ máy chính.
+
+4. Giai đoạn 2 — Thiết kế hệ thống lưu trữ
+
+Dự kiến: Ngày 2
+
+Mình không khuyên chia SSD thành hàng loạt partition nhỏ. Dùng một filesystem chính sẽ linh hoạt hơn, còn dung lượng được kiểm soát bằng monitoring và dọn dẹp.
+
+SSD 128 GB — Hiệu năng
+
+Dung lượng mục tiêu
+
+Ubuntu + hệ thống  ~25 GB
+Docker images và container layers  ~45 GB
+PostgreSQL và application state  ~25 GB
+Dự phòng và tăng trưởng  ~33 GB
+
+Ngân sách dung lượng, không phải phân vùng thực tế. 128 GB danh nghĩa có thể hiển thị khoảng 119 GiB trên Linux.
+
+HDD khoảng 252 GB — Lưu trữ
+
+Backup database, cấu hình và volumes  ~100 GB
+Uploads, documents, artifacts  ~100 GB
+Dự phòng  ~52 GB
+
+Sau khi kiểm tra SMART và sao lưu dữ liệu, nếu quyết định dành toàn bộ HDD cho Linux, có thể format ext4 và mount tại /srv/storage bằng UUID trong /etc/fstab.
+
+Cấu trúc dự kiến:
+
+/
+├── var/
+│   └── lib/
+│       └── docker/          # Images và named volumes
+│
+├── etc/
+│   └── dokploy/             # Cấu hình Dokploy
+│
+└── srv/
+    └── storage/             # HDD
+        ├── backups/
+        │   ├── postgres/
+        │   ├── applications/
+        │   └── configs/
+        ├── uploads/
+        ├── documents/
+        └── archives/
+
+Database đang hoạt động nên nằm trên SSD. Không chuyển PostgreSQL data directory sang HDD chỉ để tiết kiệm vài GB nếu chưa thực sự cần.
+
+Docker volumes do Dokploy quản lý cũng phải được backup theo cơ chế tương ứng. Theo tài liệu Dokploy, tính năng Volume Backups hoạt động với Docker named volumes, không phải mọi bind mount. 
+Dokploy
++1
+
+5. Giai đoạn 3 — Networking và truy cập từ xa
+
+Dự kiến: Ngày 2–4
+
+Mình sẽ tách mạng thành hai lớp: private để quản trị và public để phục vụ website.
+
+Dịch vụ  Truy cập LAN  Truy cập Tailscale  Public Internet
+SSH  Có thể  Có  Không
+Dokploy Admin  Có thể  Có  Không
+PostgreSQL  Nội bộ container  Chỉ khi có cấu hình riêng  Không
+Homepage  Có thể  Có  Không
+Uptime Kuma dashboard  Có thể  Có  Không
+n8n Editor  Có thể  Có  Không
+Website cá nhân  Có  Có  Có
+API public  Có  Có  Có
+
+5.1. Địa chỉ mạng
+
+Cấu hình cho máy một địa chỉ nội bộ ổn định bằng DHCP reservation trên router, chẳng hạn 192.168.1.50 nếu địa chỉ này còn trống trong mạng của bạn.
+
+Dùng tên homelab-01 trong Tailscale MagicDNS để truy cập từ laptop hoặc điện thoại.
+
+Sau khi cài Tailscale và đăng nhập:
+
+Bash
+tailscale status
+tailscale ip -4
+
+Ví dụ kết nối từ laptop:
+
+Bash
+ssh your-user@homelab-01
+
+Tailscale hỗ trợ truy cập SSH qua mạng riêng mà không cần public port 22 trên Internet. 
+Tailscale Docs
+
+5.2. Cloudflare Tunnel
+
+Luồng public:
+
+Người dùng Internet
+
+Cloudflare HTTPS
+
+Cloudflare Tunnel
+
+Dokploy Traefik :80
+
+Ứng dụng của bạn
+
+Ví dụ khi có domain riêng:
+
+Domain minh họa  Mục đích
+app.example.com  Next.js frontend
+api.example.com  Backend API
+demo.example.com  Dự án thử nghiệm
+blog.example.com  Blog cá nhân
+
+example.com chỉ là domain minh họa.
+
+Dokploy có hướng dẫn tích hợp Cloudflare Tunnel qua Traefik, kể cả wildcard subdomain. Nếu dùng phương án này, HTTPS được xử lý tại Cloudflare, còn route nội bộ trong Dokploy sử dụng HTTP theo cấu hình tương ứng để tránh lỗi redirect và chứng chỉ. 
+Dokploy
+
+Mình không đề xuất mở port forwarding 80, 443, 3000 hoặc 5432 trên router trong giai đoạn đầu.
+
+6. Giai đoạn 4 — Cài Docker và Dokploy
+
+Dự kiến: Ngày 3
+
+Mình chọn Dokploy vì đúng nhu cầu deploy nhiều project, quản lý Docker image, environment variables, logs, domain và database bằng web UI.
+
+Trình tự
+
+1. Hoàn thành networking và Tailscale.
+2. Cài Docker Engine bằng repository chính thức, hoặc để installer Dokploy cài Docker trên Ubuntu sạch.
+3. Kiểm tra các port 80, 443 và 3000 chưa bị ứng dụng khác chiếm.
+4. Cài Dokploy.
+5. Thiết lập tài khoản admin, mật khẩu mạnh và 2FA nếu khả dụng.
+6. Chỉ cho phép quản trị từ mạng tin cậy.
+
+Lệnh installer chính thức hiện tại của Dokploy là:
+
+Bash
+curl -sSL https://dokploy.com/install.sh | sh
+
+Nên xem nội dung script trước khi chạy và chỉ lấy từ website chính thức. Installer cần quyền quản trị và sẽ cấu hình Docker Swarm cho Dokploy. 
+Dokploy
+
+Sau khi cài, kiểm tra:
+
+Bash
+docker version
+docker info
+docker service ls
+docker ps
+
+Trang Dokploy ban đầu thường sử dụng port 3000. Chỉ thực hiện thiết lập qua LAN tin cậy hoặc đường kết nối đã được bảo vệ; không public giao diện khởi tạo tài khoản ra Internet.
+
+Một điểm quan trọng: đừng chỉ dựa vào UFW để chặn các port Docker đã publish. Docker có cơ chế thiết lập firewall riêng và published ports có thể bỏ qua quy tắc UFW thông thường. Cần kiểm soát ở cả Docker, host và router. 
+Docker Docs
+
+Về Redis: Mình không thêm Redis vào stack ứng dụng. Tài liệu troubleshooting mới của Dokploy cũng ghi nhận từ phiên bản v0.29.9, bản self-hosted không còn sử dụng Redis nội bộ. 
+Dokploy
+
+Tiêu chí hoàn thành: Dokploy khởi động cùng hệ thống, restart máy không mất configuration, dashboard truy cập được qua mạng quản trị.
+
+7. Giai đoạn 5 — PostgreSQL và deploy dự án đầu tiên
+
+Dự kiến: Ngày 5
+
+7.1. Database
+
+Mình sẽ dùng PostgreSQL làm database chính cho các dự án cá nhân.
+
+Đầu tiên tạo một PostgreSQL service trong Dokploy. Cấu hình dự kiến:
+
+Cấu hình  Giá trị
+Database engine  PostgreSQL
+Storage  Docker named volume trên SSD
+Memory budget  Khoảng 300–700 MB lúc tải nhẹ
+Port public  Không
+Backup  pg_dump hằng ngày + off-site
+Access  Chỉ từ ứng dụng trong mạng Docker
+
+Không cần một PostgreSQL container riêng cho mọi dự án. Ban đầu có thể dùng chung một PostgreSQL instance nhưng tạo database và user riêng cho từng ứng dụng.
+
+Ví dụ:
+
+PostgreSQL
+├── portfolio_db
+├── personal_api_db
+├── project_a_db
+└── n8n_db
+
+Dokploy tự có database để lưu cấu hình của chính nó; database này cần được backup riêng.
+
+7.2. Deploy project đầu tiên
+
+Mình đề xuất lấy một dự án Node.js/Next.js của bạn làm project thử nghiệm.
+
+Cấu trúc repository mẫu:
+
+my-project/
+├── src/
+├── public/
+├── Dockerfile
+├── .dockerignore
+├── package.json
+├── package-lock.json
+├── .env.example
+├── .github/
+│   └── workflows/
+│       └── deploy.yml
+└── README.md
+
+Trong Dokploy:
+
+1. Tạo Project personal-projects.
+2. Tạo Environment production.
+3. Tạo Application my-project.
+4. Kết nối Docker image từ GHCR.
+5. Khai báo DATABASE_URL và các secret cần thiết.
+6. Cấu hình domain, container port và health check.
+7. Deploy lần đầu và kiểm tra logs.
+
+Kết quả mong muốn: Có một Next.js app truy cập được qua domain HTTPS, kết nối PostgreSQL và không mất dữ liệu sau khi restart container.
+
+8. Giai đoạn 6 — Hoàn chỉnh CI/CD tự động
+
+Dự kiến: Ngày 6
+
+Đây sẽ là thành phần quan trọng nhất của homelab nếu bạn thường xuyên code và deploy dự án.
+
+Pipeline đề xuất
+
+1. Git Push
+
+Bạn push code lên branch main
+
+2. Continuous Integration
+
+GitHub Actions chạy lint, test
+
+3. Build & Publish
+
+Build Docker image, đẩy lên GHCR
+
+4. Private Deployment Trigger
+
+GitHub runner kết nối Tailscale, gọi Dokploy API
+
+5. Continuous Deployment
+
+Dokploy pull image mới, cập nhật ứng dụng
+
+6. Health Check
+
+Kiểm tra API, website và kết quả deploy
+
+Cách GitHub Actions triển khai vào Dokploy riêng tư
+
+Nếu chỉ dùng GitHub-hosted runner và giữ Dokploy private thì runner không thể tự gọi một API chỉ truy cập được trong LAN.
+
+Mình chọn giải pháp dùng Tailscale GitHub Action. Mỗi lần deploy, runner tạm thời tham gia tailnet, gọi Dokploy API rồi rời mạng sau khi hoàn tất. Tailscale hỗ trợ chính workflow này, với ephemeral runner và quyền truy cập giới hạn bằng tag/ACL. 
+Tailscale Docs
++1
+
+Ví dụ workflow cho một ứng dụng Node.js đã có Dockerfile:
+
+YAML
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test
+        run: |
+          npm ci
+          npm run lint --if-present
+          npm run test --if-present
+
+      - name: Define image name
+        id: image
+        shell: bash
+        run: |
+          echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" \
+            >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:latest
+            ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
+
+      - name: Connect to private server
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Trigger Dokploy deployment
+        env:
+          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          DOKPLOY_APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
+        run: |
+          curl --fail-with-body -sS -X POST \
+            "$DOKPLOY_URL/api/application.deploy" \
+            -H "x-api-key: $DOKPLOY_API_KEY" \
+            -H "Content-Type: application/json" \
+            --data "{\"applicationId\":\"$DOKPLOY_APP_ID\"}"
+
+
+Đây là template cho bước triển khai, chưa phải workflow có thể chạy nguyên xi nếu chưa cấu hình GHCR, Tailscale OAuth, ACL, các GitHub Secrets và Application ID trong Dokploy. DOKPLOY_URL phải là địa chỉ mà runner kết nối được qua Tailscale, ví dụ http://100.x.y.z:3000.
+
+Trong Dokploy, có thể cấu hình image sử dụng tag latest để dễ bắt đầu. Pipeline đồng thời publish tag theo commit SHA để có thể truy xuất phiên bản cũ và phục vụ rollback rõ ràng hơn.
+
+Với ứng dụng khác Node.js, thay bước test bằng lệnh tương ứng. Khi hệ thống hoàn thiện hơn, mình sẽ chuyển sang deploy image theo digest hoặc SHA cố định thay vì phụ thuộc vào latest.
+
+Quy tắc cho CI/CD
+
+- Chỉ deploy production sau khi CI thành công trên main.
+- Không deploy tự động các PR chưa được kiểm duyệt.
+- GitHub-hosted runner build image; PC ở nhà chủ yếu pull và chạy image.
+- Token chỉ có quyền tối thiểu và lưu trong GitHub Secrets.
+- Tailscale runner chỉ nên được phép gọi endpoint cần thiết trên Home Server.
+- Mỗi ứng dụng có health check và quy trình rollback.
+
+9. Giai đoạn 7 — Backup và phục hồi
+
+Dự kiến: Ngày 7
+
+Đây là phần mình sẽ làm trước khi đưa dữ liệu cá nhân quan trọng lên server.
+
+Dữ liệu  Tần suất dự kiến  Nơi lưu
+PostgreSQL dumps  Mỗi ngày  HDD và off-site
+Application volumes quan trọng  Mỗi ngày  HDD và off-site
+Dokploy configuration  Mỗi tuần và trước khi update  Off-site
+Server configuration  Sau mỗi thay đổi  Git repo private, không chứa secret
+Tài liệu, file uploads  Mỗi ngày  HDD và off-site
+
+Dokploy hỗ trợ backup cấu hình/DB hệ thống và các database được quản lý lên S3-compatible storage. 
+Dokploy
++1
+
+Mình sẽ dùng:
+
+- Local backup: Cron script thực hiện backup ra HDD, kiểm tra ổ đã mount trước khi ghi.
+- Off-site backup: S3-compatible storage hoặc ổ ngoài tách khỏi PC.
+- Restore test: Ít nhất mỗi tháng kiểm tra khôi phục một database vào môi trường thử nghiệm.
+
+HDD nằm trong cùng PC không phải bản backup độc lập. Nếu nguồn điện, mainboard hoặc sự cố khác làm hỏng cả hai ổ, bạn có thể mất toàn bộ dữ liệu. GitHub cũng không thay thế backup database và file uploads.
+
+Mục tiêu ban đầu: dữ liệu backup cách nhau tối đa khoảng 24 giờ, và phải có quy trình khôi phục đã kiểm tra thực tế.
+
+10. Giai đoạn 8 — Monitoring và cảnh báo
+
+Dự kiến: Ngày 8
+
+Mình sẽ cài Uptime Kuma trước vì nhẹ, dễ sử dụng và đủ hữu ích cho homelab nhỏ.
+
+Theo dõi:
+
+- Home Server và các ứng dụng đang chạy.
+- Website frontend và API health endpoint.
+- Kết nối PostgreSQL bằng kiểm tra nội bộ.
+- SSL/HTTPS và thời gian phản hồi.
+- Dung lượng SSD/HDD, RAM, CPU và nhiệt độ thông qua công cụ host monitoring phù hợp.
+
+Ví dụ:
+
+Mục tiêu monitoring
+
+Minh họa
+
+Portfolio website
+
+HTTP 200
+
+Backend API
+
+/health
+
+PostgreSQL
+
+Internal check
+
+SSD disk usage
+
+Alert khi >80%
+
+Có thể gửi cảnh báo về Telegram hoặc Discord. Lưu ý Uptime Kuma chạy trên cùng PC sẽ không thể tự gửi cảnh báo khi chính PC hoặc mạng nhà tắt hoàn toàn; sau này nên bổ sung một external uptime check.
+
+11. Giai đoạn 9 — Các dịch vụ self-hosted mở rộng
+
+Dự kiến: Ngày 9–10 và sau đó
+
+Mình sẽ ưu tiên những thứ có ích ngay cho công việc lập trình.
+
+![Share your homepage · gethomepage homepage · Discussion #473 · GitHub](https://images.openai.com/static-rsc-4/KdM898AEFQI2GrbrbOkt4TCflaTFKURPDSjUDAPRpToCfW2N2q2F1sSIn-7xX45qoafJlpyeiEcdLIX25hbAx-JAUoei-MHqeiwIuwWvi0nymnp6S8bUrXuEm66UAnuYb5-8oFdmS0pe0E9uNdWWCcmhW_HYKnUGWE0PalWW_nI?purpose=inline)
+
+Homepage
+
+Trang chủ cho homelab, chứa các đường dẫn đến Dokploy, Uptime Kuma, n8n, project và những dịch vụ khác.
+
+![n8n Workflow Builder Tutorial: Automate Daily Standups | DataCamp](https://images.openai.com/static-rsc-4/V8y_t6WhcE-z4efiOVt4vHLp66fSVatdQLVBBaWlgIrT-jGjwu4JzFbbpiHrTa9drIcwTKZ-_kfDY5cQn6G9-Ku_xMNiIca_E6lGHbgfzfINdE2UNCpjpzfm47_-Ulj6pg9eGvqCjwI_B3udXr8NbKO6Hk15wuHh11aGskeLRS0?purpose=inline)
+
+n8n
+
+Tạo automation từ webhook, cron, GitHub và API. Giai đoạn đầu chạy single-instance, không cấu hình queue mode hoặc Redis. Có thể dùng PostgreSQL làm database.
+
+![Forgejo Git Forge for Apache NuttX RTOS (Experimental)](https://images.openai.com/static-rsc-4/kL8mW5gAjAqiJoJo3I6Sfgrg6mzgXfBbo8vtABQw0EQMmbB1XuZVucjwcsWDxtHMorw1EDSBjbXSa8rVzr2pjWpHpslomgrmGJW0mY4yrOk3mOeXwRc3GRUEq0VuyqvhcUVIHwjrJ1VLWlrsdct8IHUceIcPUup35qiJ_rJ2uJg?purpose=inline)
+
+Forgejo
+
+Git server riêng, quản lý repositories và mirror code. Cài sau khi CI/CD với GitHub đã hoạt động ổn định, tránh phải bảo trì hai hệ thống CI cùng lúc.
+
+![Miniflux - Minimalist and Opinionated Feed Reader](https://images.openai.com/static-rsc-4/bqY_kmHRBaclMigHh5RoZ_EhZwkDTxVaseS1xHK-pA3_RrXyXg1kFjpg7Pxx8lBs4JttrPt2hQ3ZW7tqy7MMr1CLjoHTrHyqlqNAEv41GXdwXY_yHehw4T7eLghkFON_goOs6Ragm8Qealk1K3fAyxrpqn1_VNiWihO3Lhw1-uQ?purpose=inline)
+
+Miniflux
+
+RSS reader cá nhân. Có thể kết hợp n8n với API AI bên ngoài để lọc tin tức, tóm tắt nội dung và gửi một bản tổng hợp hằng ngày.
+
+Trong 6 video bạn gửi, việc kết hợp Forgejo, n8n, PostgreSQL và các ứng dụng tự viết là một trong những ý tưởng nổi bật. Mình muốn tận dụng đúng hướng đó, nhưng triển khai từng dịch vụ theo khả năng RAM thực tế.
+
+Một số project thú vị có thể tự làm
+
+Project  Ý tưởng
+Personal API Platform  Host nhiều API Node.js, Go hoặc Python
+GitHub PR Preview  Tự triển khai môi trường xem trước khi merge
+RSS AI Digest  Tự đọc RSS, tóm tắt và gửi Telegram
+Webhook Hub  Nhận webhook và chạy automation
+Personal Analytics  Thu thập dữ liệu dự án, hiển thị dashboard
+Status Page  Công bố trạng thái các ứng dụng cá nhân
+Pastebin  Lưu và chia sẻ code snippet qua URL
+
+Với các dự án này, chiếc PC sẽ vừa là server có ứng dụng thật, vừa là nơi bạn thực hành kỹ năng backend và DevOps.
+
+12. Quản lý tài nguyên cho RAM 8 GB
+
+Phần này rất quan trọng, vì không thể đối xử chiếc PC như một VPS có 32–64 GB RAM.
+
+RAM budget dự kiến khi chạy tải nhẹ
+
+Ubuntu + Docker
+
+0.6–1.2 GB
+
+Dokploy và thành phần nội bộ
+
+0.7–1.5 GB
+
+PostgreSQL cho dự án
+
+0.3–0.8 GB
+
+1–2 ứng dụng web/API
+
+0.6–1.5 GB
+
+n8n + monitoring + Homepage
+
+0.5–1.2 GB
+
+Dự phòng cho cache, spikes
+
+1.5–2.5 GB
+
+Các mức này là ngân sách ước tính để lập kế hoạch, không phải số liệu benchmark hay cam kết sử dụng RAM. Mức thực tế phụ thuộc từng app và workload.
+
+Với cấu hình này, mình đặt một số giới hạn:
+
+- Chỉ 1 replica cho mỗi web service.
+- Không chạy build nặng trực tiếp trên máy khi đã có CI trên GitHub.
+- Giới hạn memory cho container khi phù hợp; không đặt giới hạn quá thấp khiến dịch vụ liên tục OOM.
+- Tạm dừng ứng dụng không dùng thường xuyên.
+- Không cài GitLab, Elasticsearch, Prometheus stack đầy đủ và Kubernetes production ngay.
+- Giữ dung lượng SSD trống ít nhất khoảng 20% nếu có thể, theo dõi Docker image và log growth.
+
+Khi cần nâng cấp, 16 GB RAM là ưu tiên số một.
+
+13. Giai đoạn 10 — Vận hành, kiểm thử và tài liệu hóa
+
+Dự kiến: Ngày 11–14
+
+Trước khi xem homelab là hoàn thành, mình sẽ thực hiện các bài kiểm thử sau.
+
+Checklist nghiệm thu
+
+0/11 hoàn thành
+
+[ ]
+Reboot PC: server tự lên mạng và các service tự chạy
+[ ]
+SSH qua Tailscale hoạt động từ mạng ngoài
+[ ]
+Deploy tự động thành công sau khi push lên main
+[ ]
+CI lỗi thì không deploy production
+[ ]
+Website và API public hoạt động qua HTTPS
+[ ]
+PostgreSQL không thể truy cập trực tiếp từ Internet
+[ ]
+Restart container không làm mất database và volumes
+[ ]
+Restore một PostgreSQL backup vào DB thử nghiệm
+[ ]
+Rollback về image cũ khi deployment mới lỗi
+[ ]
+Nhận cảnh báo khi website hoặc API bị lỗi
+[ ]
+Kiểm tra tình trạng RAM, ổ đĩa và CPU khi có tải
+Sao chép checklist
+
+Mình cũng muốn có một Git repository riêng chứa các tài liệu hạ tầng, ví dụ:
+
+homelab-infra/
+├── README.md
+├── architecture/
+│   └── network.md
+├── docs/
+│   ├── installation.md
+│   ├── deployment.md
+│   ├── backup-restore.md
+│   └── troubleshooting.md
+├── scripts/
+│   ├── backup.sh
+│   └── healthcheck.sh
+├── monitoring/
+└── .gitignore
+
+Không commit .env, password, API key hay token. Một repository hạ tầng được tổ chức rõ ràng cũng sẽ rất hữu ích nếu bạn muốn dùng homelab làm portfolio DevOps.
+
+14. Khi nào mới nên học Kubernetes trên máy này?
+
+Mình chia thành hai trạng thái:
+
+Hiện tại — 8 GB  Sau khi nâng 16 GB
+Ubuntu Server bare metal  Vẫn có thể giữ Ubuntu
+Docker + Dokploy  Docker + Dokploy
+CI/CD + deployment thật  CI/CD + deployment thật
+PostgreSQL và vài service  Thêm single-node K3s
+Học Linux, Docker, networking  Học Helm, FluxCD, GitOps
+Ưu tiên ổn định  Có thêm môi trường lab
+
+Không cần cài lại server chỉ để bắt đầu học K3s; có thể dựng môi trường lab riêng khi đủ tài nguyên, và không đặt các dữ liệu quan trọng vào cluster đang thử nghiệm.
+
+Nếu về sau bạn muốn chuyển sang Proxmox hoặc Talos Linux, lúc đó nên cân nhắc lại kiến trúc, backup và phần cứng trước khi di chuyển.
+
+15. Kết quả cuối cùng mình muốn đạt được
+
+Home Server v1.0 — Definition of Done
+
+Push code lên GitHub là có quy trình CI/CD tự động deploy dự án.
+Có thể deploy nhiều ứng dụng Next.js, Node.js, Go hoặc Python với domain riêng.
+Có PostgreSQL persistence, backup và restore đã được thử nghiệm.
+Có giao diện quản trị, dashboard, monitoring và cảnh báo.
+Có thể quản lý server từ xa qua Tailscale, không public SSH hay database.
+n8n chạy được các automation cá nhân mà không cần Redis.
+
+Chi phí bắt buộc để bắt đầu có thể gần như bằng 0 nếu tận dụng toàn bộ phần cứng cũ và các free tier phù hợp. Tuy nhiên, vẫn cần tính điện, mạng, domain nếu dùng domain riêng, và chi phí lưu trữ backup ngoài máy.
+
+Bước tiếp theo
+
+Mình khuyên bắt đầu với Ngày 1: kiểm tra HDD, kiểm tra USB Wi-Fi trên Ubuntu Live và chuẩn bị USB cài hệ điều hành. Đây là các bước chưa xóa dữ liệu và giúp xác định chính xác khả năng triển khai trên PC của bạn.
+
+Còn một điểm chưa xác nhận: PC sẽ kết nối bằng dây LAN hay bắt buộc dùng USB Wi-Fi. Kế hoạch trên hỗ trợ cả hai, nhưng mình sẽ ưu tiên kiểm thử driver Wi-Fi trước nếu bạn không thể cắm LAN.
+
+![](https://www.google.com/s2/favicons?domain=https://docs.dokploy.com&sz=32)
+
+![](https://www.google.com/s2/favicons?domain=https://tailscale.com&sz=32)
+
+![](https://www.google.com/s2/favicons?domain=https://docs.docker.com&sz=32)

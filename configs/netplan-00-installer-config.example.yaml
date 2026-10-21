@@ -1,0 +1,24 @@
+# Netplan config cho homelab-01 — BẢN EXAMPLE (đã thay password WiFi bằng placeholder)
+# Bản thật nằm tại /etc/netplan/00-installer-config.yaml trên server (chmod 600)
+# Lưu ý: SSID có dấu cách phải đặt trong ngoặc kép
+network:
+  version: 2
+  ethernets:
+    eno1:
+      match:
+        macaddress: 8c:89:a5:e6:60:5f
+      set-name: eno1
+      optional: true          # không cắm dây — tránh wait-online timeout
+  wifis:
+    wlp2s0:
+      access-points:
+        "<TEN_SSID_WIFI>":
+          password: "<PASSWORD_WIFI>"
+      dhcp4: false
+      addresses:
+        - 192.168.1.140/24
+      routes:
+        - to: default
+          via: 192.168.1.1
+      nameservers:
+        addresses: [1.1.1.1, 8.8.8.8, 192.168.1.1]
