@@ -104,3 +104,28 @@ docker ps --filter name=hello                          # 1 replica healthy
 | redirect loop | bật HTTPS trong Dokploy | tắt HTTPS, cert None |
 | deploy job skipped | `DEPLOY_ENABLED` chưa set | thêm variable `true` |
 | deploy 403 | API key sai/thiếu scope | tạo lại key, kiểm tra `x-api-key` |
+
+## 9. Trạng thái thực thi — 22/10/2026 01:00 +07
+
+| Hạng mục | Giá trị thực |
+|---|---|
+| Project | `personal` = `X816lHAiV3ff5RdD8iZ3O` |
+| Environment | `production` = `rzWPRXdKFPR83yuJ0QEfE` |
+| Application | `hello` = `qJIbE8SOBTDgbFDSAr7dM`, `appName=hello-o1vegt` |
+| Domain | `hello.phucnn.io.vn` (`Pgk6GzUXoPJdDayk2ircV`), HTTPS off · cert none |
+| GitHub secrets | `DOKPLOY_URL`=`http://100.83.245.0:3000`, `DOKPLOY_API_KEY`, `DOKPLOY_APP_ID` đã set |
+
+**Đã chứng minh end-to-end** bằng image tạm `traefik/whoami`:
+```
+https://hello.phucnn.io.vn → HTTP/2 200, Host giữ nguyên hello.phucnn.io.vn
+RemoteAddr 10.0.1.4 (cloudflared) → Traefik → container app
+```
+Tức Cloudflare Tunnel → Traefik → Dokploy app → container đã thông; chỉ còn thay image.
+
+### Còn chờ để chốt Phase 5
+1. GHCR package `hello` → **Public** (hoặc PAT `read:packages`), rồi:
+   - `application.saveDockerProvider` = `ghcr.io/bechovang/homeserver-bechovang/hello:latest`
+   - `domain.update` port `80` → `3000`
+   - deploy lại → `/health` = `{"status":"ok"}`
+2. Tailscale OAuth client `tag:ci` (hoặc auth key) → set `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`, thêm ACL `tag:ci → homelab-01:3000`, bật variable `DEPLOY_ENABLED=true`.
+3. Push commit → xác nhận deploy job chạy, đổi image tag `sha-...` để test rollback.
