@@ -1,0 +1,47 @@
+# Gatus — status page cho homelab (config-as-code, mount vào /config/config.yaml)
+storage:
+  type: memory
+
+alerting:
+  # Bật khi có webhook. Ví dụ Telegram:
+  # telegram:
+  #   token: "${TELEGRAM_TOKEN}"
+  #   id: "${TELEGRAM_CHAT_ID}"
+  #   default-alert:
+  #     enabled: true
+  #     failure-threshold: 3
+  #     success-threshold: 2
+  #     send-on-resolved: true
+
+endpoints:
+  - name: hello
+    group: apps
+    url: "https://hello.phucnn.io.vn/health"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - '[BODY] == pat(*"status":"ok"*)'
+    alerts:
+      - type: telegram
+        enabled: false
+
+  - name: cloudflare-edge
+    group: infra
+    url: "https://phucnn.io.vn/"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 404"   # chưa có app ở apex; 404 = Tunnel + Traefik sống
+
+  - name: dokploy-postgres
+    group: infra
+    url: "tcp://dokploy-postgres:5432"
+    interval: 60s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: dokploy-api
+    group: infra
+    url: "http://dokploy:3000/api/health"   # trong dokploy-network
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"

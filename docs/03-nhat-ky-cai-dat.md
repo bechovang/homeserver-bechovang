@@ -177,3 +177,13 @@ Còn treo: Dokploy admin **0 user** → chặn Phase 5; nên chuyển `cloudflar
 - Tailscale ACL cần `"tagOwners": {"tag:ci": ["autogroup:admin"]}` trước khi OAuth client join được
 - Nghiệm thu: `/health` 200, `version=latest`; test fail trên PR → build+deploy skip; rollback `:sha-0df7617…` chạy đúng rồi trả `:latest`
 - GitHub secrets: `DOKPLOY_URL`, `DOKPLOY_API_KEY`, `DOKPLOY_APP_ID`, `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`; variable `DEPLOY_ENABLED=true`
+
+## 2026-10-22 (đợt 6) — Phase 6: backup + monitoring + reboot test
+
+- `scripts/homelab-backup.sh` → `/usr/local/sbin/`, units `homelab-backup.{service,timer}` (02:30 daily) + `homelab-backup-verify.{service,timer}` (CN 03:30)
+- Chạy thật: `dokploy` dump 196K, configs 100K/ngày; drill restore **67 bảng** vào `restore_check_*` rồi drop
+- Gatus `ghcr.io/twin/gatus:stable` trên `dokploy-network`, mount `/data/gatus/config`, `--restart=always`
+- Tunnel ingress thêm `status.phucnn.io.vn` → `http://gatus:8080` (version 3), status page 200
+- Reboot test: static IP giữ, docker/dokploy/traefik/postgres/cloudflared/gatus/hello tự lên, timers armed, SSH back sau ~40s
+- Không dùng `sudo` trực tiếp (user không có passwordless sudo) — thao tác root qua `docker run --privileged --pid=host -v /:/host alpine chroot /host ...`
+- Còn: alert webhook, off-site rclone, 48h theo dõi

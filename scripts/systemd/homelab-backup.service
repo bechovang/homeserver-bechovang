@@ -1,0 +1,10 @@
+[Unit]
+Description=Homelab backup (Postgres dumps + host configs)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/homelab-backup.sh
+Nice=10
+IOSchedulingClass=idle

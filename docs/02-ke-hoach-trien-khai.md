@@ -116,12 +116,12 @@ Giới hạn: mỗi service **1 replica**; không build trên server; tạm dừ
 - Chưa tạo PostgreSQL service — app hello không cần DB; làm khi app đầu tiên cần
 - Chi tiết + ID tài nguyên: [`05-phase5-app-cicd.md`](05-phase5-app-cicd.md)
 
-### ⏳ Phase 6 — Monitoring + Backup + nghiệm thu
-- Uptime Kuma (Docker, publish `127.0.0.1:3001` hoặc LAN-only), monitor: apps, `/health`, TCP PostgreSQL, disk usage; alert Telegram/Discord
-- Cron 2:30 hàng ngày: `pg_dump` các DB → `/data/backups/postgres/` (giữ 7 ngày + weekly giữ 4 tuần); rsync Dokploy config → `/data/backups/configs/`; **test restore vào DB tạm**
-- Optional off-site: rclone push bản weekly lên cloud storage
-- Homepage dashboard (gethomepage) — link tất cả services
-- Checklist nghiệm thu (xem mục 6)
+### 🔄 Phase 6 — Monitoring + Backup + nghiệm thu (22/10: 3/4 mục xong)
+- **Backup** ✅ `homelab-backup.timer` 02:30 (pg_dump -Fc + configs tar, retention 7/28/14 ngày), drill Chủ nhật 03:30 → restore thật 67 bảng
+- **Monitoring** ✅ **Gatus** thay Uptime Kuma (config-as-code, không cần UI/NCC) — `https://status.phucnn.io.vn`, 4 endpoint mỗi 60s
+- **Reboot test** ✅ static IP, Docker, Dokploy, cloudflared, hello, gatus, timers tự lên sau ~40s
+- Còn: alert Telegram/Discord, off-site backup (rclone), 48h RAM/disk, Homepage (chờ lớp auth)
+- Chi tiết: [`06-phase6-monitoring-backup.md`](06-phase6-monitoring-backup.md)
 
 ## 6. Checklist nghiệm thu (Definition of Done)
 

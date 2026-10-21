@@ -2,7 +2,7 @@
 
 Biến PC cũ (i5-3470) thành **home server CI/CD**: deploy dự án cá nhân, self-hosted services, học DevOps.
 
-> Cập nhật: 2026-10-22 · Phase 5 ✅ — push → CI → GHCR → Dokploy → `https://hello.phucnn.io.vn`; CI đỏ chặn deploy; rollback OK
+> Cập nhật: 2026-10-22 · Phase 5 ✅ (CI/CD + rollback) · Phase 6 🔄 — backup+restore drill ✅, status page ✅, reboot test ✅; còn alert webhook, off-site, 48h
 
 ## 📌 Thông tin nhanh
 
@@ -17,6 +17,8 @@ Biến PC cũ (i5-3470) thành **home server CI/CD**: deploy dự án cá nhân,
 | **Phần cứng** | i5-3470 · 8GB DDR3 (~6GB usable) · SSD 119GB · HDD 500GB |
 | **Domain** | `phucnn.io.vn` — NS Cloudflare (`bill`/`zainab`), Cloudflare Tunnel live, SSL **Full** |
 | **App demo** | `https://hello.phucnn.io.vn` — CI/CD từ repo `bechovang/homeserver-bechovang` |
+| **Status page** | `https://status.phucnn.io.vn` — Gatus, 4 endpoint × 60s |
+| **Backup** | `/data/backups` — timer 02:30 daily, restore drill CN 03:30 |
 
 ## 🗂 Cấu trúc repo
 
@@ -27,11 +29,17 @@ docs/
   03-nhat-ky-cai-dat.md        # Nhật ký: đã cài gì, config nào đã áp dụng
   04-phase4-domain-cloudflare-tunnel.md  # Runbook domain + Cloudflare Tunnel (baseline đã audit)
   05-phase5-app-cicd.md        # Runbook app mẫu + GitHub Actions → GHCR → Dokploy
+  06-phase6-monitoring-backup.md  # Backup + restore drill + Gatus + reboot test
 configs/
   netplan-00-installer-config.example.yaml   # Đã sanitize password
 apps/
   hello/                        # App mẫu zero-dependency (Node 24, Dockerfile non-root có healthcheck)
 .github/workflows/ci.yml        # test → build GHCR → deploy qua Tailscale
+scripts/
+  homelab-backup.sh             # pg_dump + configs tar + restore drill (systemd timer)
+  systemd/                      # homelab-backup{,-verify}.{service,timer}
+infra/
+  gatus/config.yaml             # status page config-as-code
 deploy-CICD/
   Xây dựng Homelab CI CD.txt   # Tài liệu gốc (thảo luận ChatGPT làm nền)
 ```
@@ -46,7 +54,7 @@ deploy-CICD/
 | 3 | Dokploy v0.30.8 — admin `phuchcm2006@gmail.com` + 2FA | ✅ Xong |
 | 4 | Domain `phucnn.io.vn` + Cloudflare Tunnel — **Active**, `cloudflared` 4 conn, `*` → `dokploy-traefik:80` | ✅ Xong |
 | 5 | App `hello` + CI/CD — push → test → GHCR → Dokploy tự deploy; CI đỏ chặn deploy; rollback `sha-…` OK | ✅ Xong |
-| 6 | Uptime Kuma + backup tự động + nghiệm thu | ⏳ |
+| 6 | Backup 02:30 + restore drill ✅ · Gatus `status.phucnn.io.vn` ✅ · reboot test ✅ · còn alert webhook + off-site + 48h | 🔄 |
 
 ## 🎯 Kiến trúc đích
 
