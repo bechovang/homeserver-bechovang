@@ -33,6 +33,16 @@ endpoints:
     alerts:
       - type: slack
 
+  - name: storagehub-web
+    group: apps
+    url: "https://storagehub.phucnn.io.vn/"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY] == pat(*StorageHub*)"
+    alerts:
+      - type: slack
+
   - name: cloudflare-edge
     group: infra
     url: "https://www.phucnn.io.vn/"

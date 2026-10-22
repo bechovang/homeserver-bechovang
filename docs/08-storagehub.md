@@ -73,7 +73,8 @@ Secret không nằm trong repo; nằm trong Dokploy DB (và trong bản backup c
 - Push `master` + `DEPLOY_ENABLED=true` → build 2 image GHCR (`:latest` + `:sha-<commit>`) → join tailnet `tag:ci` → **pin compose sang `:sha-<commit>`** (`compose.update`) → `compose.deploy`.
 - Vì sao phải pin: `docker compose up -d` với `:latest` không recreate container khi tag không đổi. Pin sha đảm bảo mỗi commit tạo container mới và rollback chỉ là chạy lại workflow cũ/đổi tag.
 - Rollback: trong Dokploy đổi tag compose sang `:sha-<commit>` cũ rồi deploy, hoặc `compose.update` rồi `compose.deploy`.
-- Secrets repo: `DOKPLOY_URL`, `DOKPLOY_API_KEY`, `DOKPLOY_COMPOSE_ID`, `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`.
+- Secrets repo: `DOKPLOY_URL`, `DOKPLOY_API_KEY`, `DOKPLOY_COMPOSE_ID`, `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`, `SLACK_WEBHOOK_URL`.
+- Job `notify` (`always()`, bỏ qua PR) gửi Slack sau mỗi run: icon OK/FAILED, repo@sha, branch, actor, kết quả từng job, link run.
 
 ## 7. Backup & restore
 

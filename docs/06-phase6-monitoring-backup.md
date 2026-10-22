@@ -45,6 +45,7 @@ journalctl -u homelab-backup.service -n 30
 | `hello` | `https://hello.phucnn.io.vn/health` → 200 + body `"status":"ok"` |
 | `site` | `https://phucnn.io.vn/` → 200 + body chứa `Bechovang` |
 | `storagehub` | `https://storagehub.phucnn.io.vn/actuator/health` → 200 + `"status":"UP"` |
+| `storagehub-web` | `https://storagehub.phucnn.io.vn/` → 200 + body chứa `StorageHub` (bắt lỗi nginx/FE) |
 | `cloudflare-edge` | `https://www.phucnn.io.vn/` → 200 |
 | `dokploy-postgres` | TCP `dokploy-postgres:5432` |
 | `dokploy-api` | `http://dokploy:3000/api/health` → 200 |
