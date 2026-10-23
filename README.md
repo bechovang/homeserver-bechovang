@@ -35,6 +35,7 @@ docs/
   06-phase6-monitoring-backup.md  # Backup + restore drill + Gatus + reboot test
   07-deploying-apps.md         # Playbook: thêm app mới (static / Node) lên pipeline
   08-storagehub.md             # StorageHub: compose 3 service, MySQL, CI/CD, seed công khai
+  09-demo-storagehub.md        # Kịch bản demo từ đầu đến cuối (5 role + CI/CD + ops)
 configs/
   netplan-00-installer-config.example.yaml   # Đã sanitize password
 apps/
