@@ -61,9 +61,11 @@ Secret không nằm trong repo; nằm trong Dokploy DB (và trong bản backup c
 |---|---|---|
 | SYSTEM_ADMIN | `nam@demo.storagehub.vn` | `password` |
 | BUSINESS_OPS | `hang@demo.storagehub.vn` | `password` |
-| FACILITY_MANAGER | `minh@demo.storagehub.vn` | `password` |
-| STAFF | `tuan@demo.storagehub.vn` | `password` |
+| **FACILITY_MANAGER** | **`tuan@demo.storagehub.vn`** | `password` |
+| **STAFF** | **`minh@demo.storagehub.vn`**, `vu@demo.storagehub.vn` | `password` |
 | CUSTOMER | `lan@demo.storagehub.vn`, `trang@demo.storagehub.vn` | `password` |
+
+> Đối chiếu DB (`users.role_id`): minh/vu = STAFF (2), tuan = FACILITY_MANAGER (3). Bảng trong `docs/RUNBOOK.md` của repo đang ghi ngược 2 dòng này — cần sửa ở repo StorageHub.
 
 ⚠️ Đây là **quyết định có chủ đích** (phương án C): site public để demo đồ án, chấp nhận ai cũng đăng nhập được admin. Không dùng dữ liệu thật. Muốn siết: Cloudflare Access / basic auth ở nginx / đổi mật khẩu toàn bộ user sau seed.
 
@@ -96,6 +98,20 @@ sudo systemctl start homelab-backup-verify.service
 | `GET /api/v1/units` (customer token) | 200, có unit LOCK-2… |
 | `POST /api/v1/payments/webhooks/payos` rỗng | 400 (đúng — thiếu chữ ký) |
 | containers | db healthy, backend healthy, frontend healthy |
+
+### Nghiệm thu sau merge `115a97d` (23/10, chạy trên domain thật)
+
+| Endpoint | Role | Kết quả |
+|---|---|---|
+| `/api/v1/users`, `/users/login-history`, `/users/permissions` | SYSTEM_ADMIN | 200 |
+| `/api/v1/activity-logs`, `/api/v1/facility/overview`, `/facility/drilldown` | FACILITY_MANAGER / ADMIN | 200 |
+| `/api/v1/shifts`, `/shifts/roster` | STAFF / FACILITY_MANAGER | 200 |
+| `/api/v1/reports/{financial-summary,monthly-revenue,drilldown}` | BUSINESS_OPS | 200 |
+| `/api/v1/units`, `/units/filter-options`, `/reservations`, `/notifications/unread-count`, `/payments` | CUSTOMER | 200 |
+| `/api/v1/users` bằng token CUSTOMER | CUSTOMER | **403** `ROLE_FORBIDDEN` (đúng ma trận quyền) |
+| SPA routes `/login /browse /facility /activity /users /reports /tasks` | – | 200 (fallback nginx) |
+
+Flyway: 5 migration, schema đã ở version 5, không có migration mới. Backend log 15 phút không có `ERROR`/`Exception`.
 
 ## 9. Vấn đề đã biết
 

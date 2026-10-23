@@ -211,3 +211,13 @@ Còn treo: Dokploy admin **0 user** → chặn Phase 5; nên chuyển `cloudflar
 - Nghiệm thu: `/` 200, `/actuator/health` UP, login admin 200, `/users` 7 user, `/units` có dữ liệu, webhook 400 đúng (thiếu chữ ký)
 - Backup script mở rộng `mysqldump` + restore drill MySQL; Gatus thêm endpoint `storagehub`; Homepage thêm link
 - PayOS `confirm-webhook` API trả 400 "Webhook url invalid" → đổi URL trong dashboard my.payos.vn thay vì API
+
+## 2026-10-23 (đợt 9) — merge loạt feature + kiểm tra runtime
+
+- Master StorageHub lên `115a97d` (merge #51 + #45–#48 + #52–#53): activity log, login history, permission matrix, staffing/shifts, facility overview, FE wire API
+- CI run `39990559560`: backend-test, frontend-build, build 2 image, deploy, notify — **tất cả success**; compose pin `sha-115a97d…`
+- Container: frontend/backend `sha-115a97d…` healthy, db healthy; Flyway v5, không migration mới
+- Kiểm tra API thật: admin (`users`, `login-history`, `permissions`, `activity-logs`, `facility`, `reports`) 200; FM (`facility`, `activity-logs`, `shifts`) 200; staff (`tasks`, `shifts/roster`) 200; bizops (`reports`) 200; customer (`units`, `reservations`, `notifications`, `payments`) 200; customer gọi `/users` → 403 đúng
+- SPA routes `/login /browse /facility /activity /users /reports /tasks` → 200
+- Phát hiện: bảng seed trong `docs/RUNBOOK.md` của repo ghi ngược role của `minh` (STAFF) và `tuan` (FACILITY_MANAGER); đã sửa trong `docs/08` của repo này, cần PR sang repo StorageHub
+- Gatus 7/7 xanh; Slack nhận tin CI/CD (`slack notified`)
