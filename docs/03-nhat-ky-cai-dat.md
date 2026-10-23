@@ -221,3 +221,10 @@ Còn treo: Dokploy admin **0 user** → chặn Phase 5; nên chuyển `cloudflar
 - SPA routes `/login /browse /facility /activity /users /reports /tasks` → 200
 - Phát hiện: bảng seed trong `docs/RUNBOOK.md` của repo ghi ngược role của `minh` (STAFF) và `tuan` (FACILITY_MANAGER); đã sửa trong `docs/08` của repo này, cần PR sang repo StorageHub
 - Gatus 7/7 xanh; Slack nhận tin CI/CD (`slack notified`)
+
+## 2026-10-23 (đợt 10) — E2E test trên domain, phát hiện 2 bug
+
+- Chạy full flow customer: quote → reserve (201) → MOMO payment (PROCESSING→SUCCEEDED) → reservation RESERVED + deposit HELD + contract DRAFT → check-in-pass 200 → notification; booking trùng → 409 `BOOKING_UNIT_TAKEN`
+- PAYOS create link: ban đầu 502 `Đơn thanh toán đã tồn tại` do `orderCode = 100000 + paymentId` trùng trên kênh dùng chung. Workaround: `PAYMENT_PAYOS_ORDERCODEBASE=700000` trong env compose → 201 trả `checkoutUrl` + `qrCode`
+- `GET /api/v1/payments` với page-size lớn → 500 NPE vì seed payment id 4 (`EXTENSION_FEE`) có `reservation_id = NULL` và mapper không null-safe
+- Đã ghi cả 2 bug + workaround vào `docs/08` mục 9; cần PR fix trong repo StorageHub

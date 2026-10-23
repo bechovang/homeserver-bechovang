@@ -111,7 +111,21 @@ sudo systemctl start homelab-backup-verify.service
 | `/api/v1/users` bằng token CUSTOMER | CUSTOMER | **403** `ROLE_FORBIDDEN` (đúng ma trận quyền) |
 | SPA routes `/login /browse /facility /activity /users /reports /tasks` | – | 200 (fallback nginx) |
 
-Flyway: 5 migration, schema đã ở version 5, không có migration mới. Backend log 15 phút không có `ERROR`/`Exception`.
+Flyway: 5 migration, schema đã ở version 5, không có migration mới.
+### E2E test thật trên domain (23/10, tài khoản lan)
+
+| Bước | Kết quả |
+|---|---|
+| `GET /units` + `/units/{id}` + quote 1 tháng | 200, quote `RENT 100.000 + DEPOSIT 10.000` |
+| `POST /reservations` (unit LOCK-2, 2026-11-01) | 201 `BK-2026-0005` PENDING_PAYMENT |
+| `POST /payments` MOMO demo | 201 PROCESSING → poll `GET /payments/{id}` → **SUCCEEDED** |
+| `GET /reservations/31` | **RESERVED**, deposit `HELD`, contract `CT-2026-0004` DRAFT |
+| `GET /reservations/31/check-in-pass` | 200 (access code + unit info) |
+| `GET /notifications` | có `RESERVATION_CONFIRMED` + `SETTLEMENT_COMPLETED` |
+| trùng unit/ngày bằng user khác | **409 BOOKING_UNIT_TAKEN** (đúng) |
+| `POST /payments` PAYOS | **201** + `checkoutUrl` + `qrCode` + `qrExpiresAt` (sau workaround orderCode) |
+| `GET /users/login-history`, `/activity-logs` | 200, thấy LOGIN + sự kiện |
+
 
 ## 9. Vấn đề đã biết
 
@@ -120,3 +134,6 @@ Flyway: 5 migration, schema đã ở version 5, không có migration mới. Back
 3. `springdoc` vẫn bật (`/swagger-ui.html`) — có thể tắt bằng `SPRINGDOC_API_DOCS_ENABLED=false` nếu muốn.
 4. JVM heap mặc định 70% RAM container; container chưa giới hạn RAM nên JVM thấy host 6GB → có thể thêm `mem_limit` nếu cần.
 5. Dev seed chạy migration mỗi lần DB trống — tạo lại volume sẽ reset toàn bộ dữ liệu demo.
+6. **PayOS orderCode collision (đã workaround).** `orderCode = 100000 + paymentId` là deterministic; kênh DEMO-MARKETPLACE dùng chung với đồ án/máy khác nên PayOS trả `Đơn thanh toán đã tồn tại` cho 100033/100034/100035 → API 502. Workaround đang chạy: thêm `PAYMENT_PAYOS_ORDERCODEBASE=700000` vào env compose (Dokploy). Fix đúng: orderCode unique mỗi lần tạo (timestamp/random) + bắt `APIException` trả 409 thay vì 500.
+7. **`GET /api/v1/payments` 500 khi list đủ dài.** Seed `payments` id 4 (`EXTENSION_FEE`) có `reservation_id = NULL`; mapper gọi `payment.getReservation().getReservationId()` → NPE. `page-size=2` chạy, `page-size>=4` (chạm row 4) → 500. Fix: null-safe mapping (`reservationId` nullable trong DTO).
+8. Số liệu test: đã tạo reservation 31–35 + payment 32 (MOMO, SUCCEEDED), 36 (PAYOS, PENDING) trên DB demo — có thể xoá bằng tay nếu cần DB sạch.
