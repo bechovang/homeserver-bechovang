@@ -228,3 +228,10 @@ Còn treo: Dokploy admin **0 user** → chặn Phase 5; nên chuyển `cloudflar
 - PAYOS create link: ban đầu 502 `Đơn thanh toán đã tồn tại` do `orderCode = 100000 + paymentId` trùng trên kênh dùng chung. Workaround: `PAYMENT_PAYOS_ORDERCODEBASE=700000` trong env compose → 201 trả `checkoutUrl` + `qrCode`
 - `GET /api/v1/payments` với page-size lớn → 500 NPE vì seed payment id 4 (`EXTENSION_FEE`) có `reservation_id = NULL` và mapper không null-safe
 - Đã ghi cả 2 bug + workaround vào `docs/08` mục 9; cần PR fix trong repo StorageHub
+
+## 2026-10-24 (đợt 11) — fix 2 bug payment, test lại prod
+
+- PR #54 (`d11aff0`): null-safe reservation mapping cho payment extension/settlement; env `PAYMENT_PAYOS_ORDERCODEBASE`
+- PR #55 (`4368413`): query + map payments trong cùng transaction (fix `LazyInitializationException: Extension#1`)
+- Test prod: payments page 25/100 = 200; MOMO E2E OK (reservation 38, contract CT-2026-0006); PayOS 201 (checkoutUrl + qrCode); RBAC đúng; Gatus 7/7; backend 0 error, 0 restart
+- Dữ liệu test thêm: reservation 36–39, payment 37–40

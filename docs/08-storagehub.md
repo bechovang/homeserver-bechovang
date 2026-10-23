@@ -137,3 +137,15 @@ Flyway: 5 migration, schema đã ở version 5, không có migration mới.
 6. **PayOS orderCode collision (đã workaround).** `orderCode = 100000 + paymentId` là deterministic; kênh DEMO-MARKETPLACE dùng chung với đồ án/máy khác nên PayOS trả `Đơn thanh toán đã tồn tại` cho 100033/100034/100035 → API 502. Workaround đang chạy: thêm `PAYMENT_PAYOS_ORDERCODEBASE=700000` vào env compose (Dokploy). Fix đúng: orderCode unique mỗi lần tạo (timestamp/random) + bắt `APIException` trả 409 thay vì 500.
 7. **`GET /api/v1/payments` 500 khi list đủ dài.** Seed `payments` id 4 (`EXTENSION_FEE`) có `reservation_id = NULL`; mapper gọi `payment.getReservation().getReservationId()` → NPE. `page-size=2` chạy, `page-size>=4` (chạm row 4) → 500. Fix: null-safe mapping (`reservationId` nullable trong DTO).
 8. Số liệu test: đã tạo reservation 31–35 + payment 32 (MOMO, SUCCEEDED), 36 (PAYOS, PENDING) trên DB demo — có thể xoá bằng tay nếu cần DB sạch.
+
+### Nghiệm thu sau merge `4368413` (24/10) — 2 bug payment đã fix
+
+| Test | Kết quả |
+|---|---|
+| `GET /payments?page-size=25` và `=100` | **200**; payment seed id 4 (`EXTENSION_FEE`, reservation NULL) trả `reservationId=1` qua extension |
+| MOMO E2E (đặt L-1, 01/2027, 2 tháng) | 201 → SUCCEEDED → RESERVED + contract `CT-2026-0006` + check-in-pass 200 |
+| PayOS tạo link | **201** + `checkoutUrl` + `qrCode` |
+| Admin: users / login-history / permissions / activity-logs | 200 |
+| FM: facility / activity-logs · STAFF: tasks / shifts | 200 |
+| RBAC | customer `/users` 403, no token 401, sai mật khẩu 401, password < 6 ký tự 400 |
+| Gatus | 7/7 xanh · backend `RestartCount=0`, 0 ERROR trong 10 phút |
