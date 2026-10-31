@@ -15,6 +15,7 @@
 | Chrome profile 2 | Staff / FM / BOPS / Admin (đăng xuất–đăng nhập lần lượt) |
 | Tab phụ | `https://status.phucnn.io.vn`, `https://github.com/bechovang/StorageHub/actions`, Slack `#homeserver-noti` |
 | Kết nối | Internet ổn định; PayOS cần mạng ra ngoài |
+| Dữ liệu | Profile **dev**: DB **clean + seed lại mỗi lần BE khởi động/deploy** — dữ liệu test cũ tự mất |
 
 ### 0.2. Tài khoản seed (mật khẩu chung `password`)
 
@@ -71,7 +72,7 @@ Có thể mở sơ đồ trong `docs/08-storagehub.md` nếu cần.
 ### A3. Đặt kho (2 phút)
 
 1. Bấm **Đặt kho** → trang booking summary.
-2. Chọn ngày bắt đầu (tương lai, ví dụ tháng sau) + số tháng.
+2. Chọn **ngày bắt đầu và ngày kết thúc** (mô hình thuê theo ngày; backend tự cộng buffer 1 ngày khi kiểm tra trùng).
 3. Bấm **Xác nhận đặt** → tạo reservation `PENDING_PAYMENT`, chuyển sang bước thanh toán.
 
 **Điểm nói:** server re-check availability trong transaction; nếu unit vừa bị người khác đặt → **409 BOOKING_UNIT_TAKEN** và gợi ý unit tương tự. (Có thể demo nhanh: profile 2 dùng `trang@` đặt cùng unit/ngày → thấy lỗi 409.)
@@ -80,14 +81,13 @@ Có thể mở sơ đồ trong `docs/08-storagehub.md` nếu cần.
 
 Trang Payment có 4 phương thức:
 
-| Tab | Cách demo | Kết quả kỳ vọng |
-|---|---|---|
-| **CARD** | nhập số thẻ bất kỳ (demo) | PROCESSING → ~1s → **SUCCEEDED** |
-| **MOMO** | nhập SĐT bất kỳ | tự SUCCEEDED (demo, không OTP) |
-| **VNPAY** | bấm thanh toán | tự SUCCEEDED |
-| **PAYOS** | bấm tạo QR | hiện **VietQR + nút mở cổng PayOS**; quét/chuyển khoản thật thì webhook xác nhận |
+Chỉ còn **một kênh: PAYOS** (CARD/MOMO/VNPAY đã bị bỏ khỏi code).
 
-Khuyến nghị khi demo: dùng **MOMO** để chắc chắn thành công, sau đó giới thiệu **PAYOS** bằng cách mở QR (không cần chuyển tiền) và nói: “đây là cổng thật, webhook đã xác thực chữ ký; tiền vào tài khoản thì trạng thái mới đổi.”
+1. Bấm thanh toán → backend tạo link PayOS, trả `checkoutUrl` + **VietQR** (hạn ~5 phút).
+2. Quét/chuyển khoản thật → PayOS gọi webhook → payment `SUCCEEDED`, reservation `RESERVED`.
+3. Nếu phòng demo không tiện chuyển tiền: profile `dev` có endpoint **`POST /api/v1/payments/{id}/demo-complete`** (FE có nút “Bỏ qua thanh toán (demo)”) để giả lập thành công — chỉ bật ở dev.
+
+Giá seed đã hạ về **theo ngày** (Locker 3.000đ/ngày, S 5.000đ, M 8.000đ, L 15.000đ), cọc tối thiểu 5.000đ để mọi giao dịch vượt ngưỡng 2.000đ của PayOS.
 
 **Sau khi thanh toán cọc:**
 - Reservation → **RESERVED**, deposit `HELD`.

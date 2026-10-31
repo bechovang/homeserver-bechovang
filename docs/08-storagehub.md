@@ -149,3 +149,14 @@ Flyway: 5 migration, schema đã ở version 5, không có migration mới.
 | FM: facility / activity-logs · STAFF: tasks / shifts | 200 |
 | RBAC | customer `/users` 403, no token 401, sai mật khẩu 401, password < 6 ký tự 400 |
 | Gatus | 7/7 xanh · backend `RestartCount=0`, 0 ERROR trong 10 phút |
+
+## 10. Cập nhật 31/10/2026 — PayOS-only, thuê theo ngày, reset DB
+
+- **Thanh toán:** bỏ hoàn toàn MockPaymentGateway/CARD/MOMO/VNPAY; PayOS là kênh duy nhất. Endpoint `POST /payments/{id}/demo-complete` chỉ bật `payment.demo.skip-enabled=true` (profile dev) để demo không cần chuyển tiền.
+- **orderCode PayOS:** đổi từ `base + paymentId` sang `paymentId * 1e9 + random` → không trùng order cũ trên kênh dùng chung (lỗi "Đơn thanh toán đã tồn tại" đã hết). Webhook vẫn giải mã được cả format cũ.
+- **Thuê theo ngày:** `POST /reservations` nhận `startDate` + `endDate`; quote tính `durationDays`; cọc tối thiểu **5.000đ** (≥ ngưỡng PayOS 2.000đ). Kiểm tra trùng cộng **TURNOVER_BUFFER 1 ngày**: khách sau chỉ được bắt đầu từ `endDate + buffer + 1`.
+- **Reset DB dev:** profile `dev` chạy `flyway.clean()` + migrate + seed **mỗi lần BE khởi động**. Flyway history + dữ liệu luôn về seed (20 migration, gồm V19 40 units, V20 policy/ticket/unit columns). Mọi deploy/restart đều reset để test PayOS từ đầu.
+- **API mới:** `/policies` (GET active, POST save/reset), `/tickets` (list/create/status), `/units/admin` + POST/PATCH/DELETE, `/reservations/{id}/checkout-request/forced`, `/reservations/transfer`.
+- **Seed giá:** RENT_RATE theo ngày — Locker 3.000, S 5.000, M 8.000, L 15.000; LATE_FEE hạ tương ứng.
+- **CI:** bỏ đếm `cancelled` là failure; thêm health gate sau deploy (fail nếu `/actuator/health` không UP trong 4 phút).
+- **Sự cố đã xử lý:** migration V7 fail vì payment id 40 trùng dữ liệu test → reset DB + sửa seed; receipt code seed `RT-2026-PROC` làm `allocateReceiptCode` ném `NumberFormatException` → đổi seed sang mã số + fallback an toàn.
